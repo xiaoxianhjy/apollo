@@ -161,7 +161,6 @@ public class ItemService {
       if(key.isEmpty()){
         List<Item> items = itemRepository.findAll();
         List<Release> releaseItems = releaseRepository.findAll();
-        //循环
         outerloop:
         for (int i = 0; i < items.size(); i++) {
           Namespace namespace = namespaceRepository.findNamespaceById((Long) items.get(i).getNamespaceId());
@@ -187,8 +186,7 @@ public class ItemService {
     if (key.isEmpty() || value.isEmpty()){
       if(key.isEmpty()){
         List<Item> items = itemRepository.findByValue(value);
-        List<Release> releaseItems = releaseRepository.findByConfigurations(value);
-        //循环
+        List<Release> releaseItems = releaseRepository.findByConfigurationsContaining(value);
         outerloop:
         for (int i = 0; i < items.size(); i++) {
           Namespace namespace = namespaceRepository.findNamespaceById((Long) items.get(i).getNamespaceId());
@@ -207,8 +205,7 @@ public class ItemService {
 
       }else if(value.isEmpty()){
         List<Item> items = itemRepository.findByKey(key);
-        List<Release> releaseItems = releaseRepository.findByReleaseKey(key);
-        //循环
+        List<Release> releaseItems = releaseRepository.findByConfigurationsContaining(key);
         outerloop:
         for (int i = 0; i < items.size(); i++) {
           Namespace namespace = namespaceRepository.findNamespaceById((Long) items.get(i).getNamespaceId());
@@ -227,8 +224,7 @@ public class ItemService {
       }
     }
     List<Item> items = itemRepository.findByKeyAndValue(key,value);
-    List<Release> releaseItems = releaseRepository.findByReleaseKeyAndConfigurations(key,value);
-    //循环
+    List<Release> releaseItems = releaseRepository.findByConfigurationsContaining(key);
     outerloop:
     for (int i = 0; i < items.size(); i++) {
       Namespace namespace = namespaceRepository.findNamespaceById((Long) items.get(i).getNamespaceId());
@@ -249,9 +245,8 @@ public class ItemService {
   public List<ItemInfoDTO> getExcludePropertiesItemInfoBySearch(String value) {
     List<ItemInfoDTO> itemInfoDTOs = new ArrayList<>();
     List<Item> items = itemRepository.findByKey("content");
-    List<Release> releaseItems = releaseRepository.findAll();
     if(value.isEmpty()){
-      //循环
+      List<Release> releaseItems = releaseRepository.findAll();
       outerloop:
       for (int i = 0; i < items.size(); i++) {
         Namespace namespace = namespaceRepository.findNamespaceById((Long)items.get(i).getNamespaceId());
@@ -268,6 +263,7 @@ public class ItemService {
       }
       return itemInfoDTOs;
     }
+    List<Release> releaseItems = releaseRepository.findByConfigurationsContaining(value);
     outerloop:
     for (int i = 0; i < items.size(); i++) {
       if(items.get(i).getValue().contains(value)){
