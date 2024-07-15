@@ -27,6 +27,7 @@ import com.ctrip.framework.apollo.biz.service.NamespaceService;
 import com.ctrip.framework.apollo.biz.service.ReleaseService;
 import com.ctrip.framework.apollo.biz.utils.ConfigChangeContentBuilder;
 import com.ctrip.framework.apollo.common.dto.ItemDTO;
+import com.ctrip.framework.apollo.common.dto.ItemInfoDTO;
 import com.ctrip.framework.apollo.common.dto.PageDTO;
 import com.ctrip.framework.apollo.common.exception.BadRequestException;
 import com.ctrip.framework.apollo.common.exception.NotFoundException;
@@ -199,6 +200,19 @@ public class ItemController {
       return BeanUtils.batchTransform(ItemDTO.class, deletedItems);
     }
     return Collections.emptyList();
+  }
+
+  @GetMapping(value={"/key/value/items/search"})
+  public List<ItemInfoDTO> getPropertiesItemInfoBySearch(@RequestParam(value = "key", required = false, defaultValue = "") String key,
+                                                         @RequestParam(value = "value", required = false, defaultValue = "") String value) {
+    List<ItemInfoDTO> ItemInfoDTOs = itemService.getPropertiesItemInfoBySearch(key, value);
+    return ItemInfoDTOs;
+  }
+
+  @GetMapping(value={"/value/items/search"})
+  public List<ItemInfoDTO> getExcludePropertiesItemInfoBySearch(@RequestParam(value = "value",required = false, defaultValue = "") String value) {
+    List<ItemInfoDTO> ItemInfoDTOs = itemService.getExcludePropertiesItemInfoBySearch(value);
+    return ItemInfoDTOs;
   }
 
   @GetMapping("/items/{itemId}")

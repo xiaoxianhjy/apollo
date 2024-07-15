@@ -21,7 +21,13 @@ import com.ctrip.framework.apollo.biz.config.BizConfig;
 import com.ctrip.framework.apollo.biz.entity.Audit;
 import com.ctrip.framework.apollo.biz.entity.Item;
 import com.ctrip.framework.apollo.biz.entity.Namespace;
+import com.ctrip.framework.apollo.biz.entity.Release;
+import com.ctrip.framework.apollo.biz.repository.AppRepository;
 import com.ctrip.framework.apollo.biz.repository.ItemRepository;
+import com.ctrip.framework.apollo.biz.repository.NamespaceRepository;
+import com.ctrip.framework.apollo.biz.repository.ReleaseRepository;
+import com.ctrip.framework.apollo.common.dto.ItemInfoDTO;
+import com.ctrip.framework.apollo.common.entity.App;
 import com.ctrip.framework.apollo.common.exception.BadRequestException;
 import com.ctrip.framework.apollo.common.exception.NotFoundException;
 import com.ctrip.framework.apollo.common.utils.BeanUtils;
@@ -33,10 +39,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -49,16 +52,22 @@ public class ItemService {
   private final NamespaceService namespaceService;
   private final AuditService auditService;
   private final BizConfig bizConfig;
+  private final NamespaceRepository namespaceRepository;
+  private final ReleaseRepository releaseRepository;
+  private final AppRepository appRepository;
 
   public ItemService(
       final ItemRepository itemRepository,
       final @Lazy NamespaceService namespaceService,
       final AuditService auditService,
-      final BizConfig bizConfig) {
+      final BizConfig bizConfig, NamespaceRepository namespaceRepository, ReleaseRepository releaseRepository, AppRepository appRepository) {
     this.itemRepository = itemRepository;
     this.namespaceService = namespaceService;
     this.auditService = auditService;
     this.bizConfig = bizConfig;
+    this.namespaceRepository = namespaceRepository;
+    this.releaseRepository = releaseRepository;
+    this.appRepository = appRepository;
   }
 
 
@@ -144,6 +153,138 @@ public class ItemService {
   public Page<Item> findItemsByNamespace(String appId, String clusterName, String namespaceName, Pageable pageable) {
     Namespace namespace = findNamespaceByAppIdAndClusterNameAndNamespaceName(appId, clusterName, namespaceName);
     return itemRepository.findByNamespaceId(namespace.getId(), pageable);
+  }
+
+  public List<ItemInfoDTO> getPropertiesItemInfoBySearch(String key, String value) {
+    List<ItemInfoDTO> itemInfoDTOs = new ArrayList<>();
+    if (key.isEmpty() && value.isEmpty()){
+      if(key.isEmpty()){
+        List<Item> items = itemRepository.findAll();
+        List<Release> releaseItems = releaseRepository.findAll();
+        //循环
+        outerloop:
+        for (int i = 0; i < items.size(); i++) {
+          Namespace namespace = namespaceRepository.findNamespaceById((Long) items.get(i).getNamespaceId());
+          App app = appRepository.findByAppId(namespace.getAppId());
+          if(items.get(i).getKey().equals("content")){
+            items.remove(i);
+            continue;
+          }
+          for (int j = 0; j < releaseItems.size(); j++) {
+            if(releaseItems.get(j).getConfigurations().contains(items.get(i).getKey()) && releaseItems.get(j).getConfigurations().contains(items.get(i).getValue())){
+              ItemInfoDTO itemInfoDTO = new ItemInfoDTO(app.getName(),namespace.getClusterName(),namespace.getNamespaceName(),"已发布",items.get(i).getKey(),items.get(i).getValue());
+              itemInfoDTOs.add(itemInfoDTO);
+              continue outerloop;
+            }
+          }
+          ItemInfoDTO itemInfoDTO = new ItemInfoDTO(app.getName(),namespace.getClusterName(),namespace.getNamespaceName(),"未发布",items.get(i).getKey(),items.get(i).getValue());
+          itemInfoDTOs.add(itemInfoDTO);
+        }
+        return itemInfoDTOs;
+
+      }
+    }
+    if (key.isEmpty() || value.isEmpty()){
+      if(key.isEmpty()){
+        List<Item> items = itemRepository.findByValue(value);
+        List<Release> releaseItems = releaseRepository.findByConfigurations(value);
+        //循环
+        outerloop:
+        for (int i = 0; i < items.size(); i++) {
+          Namespace namespace = namespaceRepository.findNamespaceById((Long) items.get(i).getNamespaceId());
+          App app = appRepository.findByAppId(namespace.getAppId());
+          for (int j = 0; j < releaseItems.size(); j++) {
+            if(releaseItems.get(j).getConfigurations().contains(items.get(i).getKey()) && releaseItems.get(j).getConfigurations().contains(items.get(i).getValue())){
+              ItemInfoDTO itemInfoDTO = new ItemInfoDTO(app.getName(),namespace.getClusterName(),namespace.getNamespaceName(),"已发布",items.get(i).getKey(),items.get(i).getValue());
+              itemInfoDTOs.add(itemInfoDTO);
+              continue outerloop;
+            }
+          }
+          ItemInfoDTO itemInfoDTO = new ItemInfoDTO(app.getName(),namespace.getClusterName(),namespace.getNamespaceName(),"未发布",items.get(i).getKey(),items.get(i).getValue());
+          itemInfoDTOs.add(itemInfoDTO);
+        }
+        return itemInfoDTOs;
+
+      }else if(value.isEmpty()){
+        List<Item> items = itemRepository.findByKey(key);
+        List<Release> releaseItems = releaseRepository.findByReleaseKey(key);
+        //循环
+        outerloop:
+        for (int i = 0; i < items.size(); i++) {
+          Namespace namespace = namespaceRepository.findNamespaceById((Long) items.get(i).getNamespaceId());
+          App app = appRepository.findByAppId(namespace.getAppId());
+          for (int j = 0; j < releaseItems.size(); j++) {
+            if(releaseItems.get(j).getConfigurations().contains(items.get(i).getKey()) && releaseItems.get(j).getConfigurations().contains(items.get(i).getValue())){
+              ItemInfoDTO itemInfoDTO = new ItemInfoDTO(app.getName(),namespace.getClusterName(),namespace.getNamespaceName(),"已发布",items.get(i).getKey(),items.get(i).getValue());
+              itemInfoDTOs.add(itemInfoDTO);
+              continue outerloop;
+            }
+          }
+          ItemInfoDTO itemInfoDTO = new ItemInfoDTO(app.getName(),namespace.getClusterName(),namespace.getNamespaceName(),"未发布",items.get(i).getKey(),items.get(i).getValue());
+          itemInfoDTOs.add(itemInfoDTO);
+        }
+        return itemInfoDTOs;
+      }
+    }
+    List<Item> items = itemRepository.findByKeyAndValue(key,value);
+    List<Release> releaseItems = releaseRepository.findByReleaseKeyAndConfigurations(key,value);
+    //循环
+    outerloop:
+    for (int i = 0; i < items.size(); i++) {
+      Namespace namespace = namespaceRepository.findNamespaceById((Long) items.get(i).getNamespaceId());
+      App app = appRepository.findByAppId(namespace.getAppId());
+      for (int j = 0; j < releaseItems.size(); j++) {
+        if(releaseItems.get(j).getConfigurations().contains(items.get(i).getKey()) && releaseItems.get(j).getConfigurations().contains(items.get(i).getValue())){
+          ItemInfoDTO itemInfoDTO = new ItemInfoDTO(app.getName(),namespace.getClusterName(),namespace.getNamespaceName(),"已发布",items.get(i).getKey(),items.get(i).getValue());
+          itemInfoDTOs.add(itemInfoDTO);
+          continue outerloop;
+        }
+      }
+      ItemInfoDTO itemInfoDTO = new ItemInfoDTO(app.getName(),namespace.getClusterName(),namespace.getNamespaceName(),"未发布",items.get(i).getKey(),items.get(i).getValue());
+      itemInfoDTOs.add(itemInfoDTO);
+    }
+    return itemInfoDTOs;
+  }
+
+  public List<ItemInfoDTO> getExcludePropertiesItemInfoBySearch(String value) {
+    List<ItemInfoDTO> itemInfoDTOs = new ArrayList<>();
+    List<Item> items = itemRepository.findByKey("content");
+    List<Release> releaseItems = releaseRepository.findAll();
+    if(value.isEmpty()){
+      //循环
+      outerloop:
+      for (int i = 0; i < items.size(); i++) {
+        Namespace namespace = namespaceRepository.findNamespaceById((Long)items.get(i).getNamespaceId());
+        App app = appRepository.findByAppId(namespace.getAppId());
+        for (int j = 0; j < releaseItems.size(); j++) {
+          if( releaseItems.get(j).getConfigurations().contains(items.get(i).getValue())){
+            ItemInfoDTO itemInfoDTO = new ItemInfoDTO(app.getName(),namespace.getClusterName(),namespace.getNamespaceName(),"已发布",items.get(i).getKey(),items.get(i).getValue());
+            itemInfoDTOs.add(itemInfoDTO);
+            continue outerloop;
+          }
+        }
+        ItemInfoDTO itemInfoDTO = new ItemInfoDTO(app.getName(),namespace.getClusterName(),namespace.getNamespaceName(),"未发布",items.get(i).getKey(),items.get(i).getValue());
+        itemInfoDTOs.add(itemInfoDTO);
+      }
+      return itemInfoDTOs;
+    }
+    outerloop:
+    for (int i = 0; i < items.size(); i++) {
+      if(items.get(i).getValue().contains(value)){
+        Namespace namespace = namespaceRepository.findNamespaceById((Long) items.get(i).getNamespaceId());
+        App app = appRepository.findByAppId(namespace.getAppId());
+        for (int j = 0; j < releaseItems.size(); j++) {
+          if((releaseItems.get(j).getConfigurations().contains("content")) && releaseItems.get(j).getConfigurations().contains(items.get(i).getValue())){
+            ItemInfoDTO itemInfoDTO = new ItemInfoDTO(app.getName(),namespace.getClusterName(),namespace.getNamespaceName(),"已发布",items.get(i).getKey(),items.get(i).getValue());
+            itemInfoDTOs.add(itemInfoDTO);
+            continue outerloop;
+          }
+        }
+        ItemInfoDTO itemInfoDTO = new ItemInfoDTO(app.getName(),namespace.getClusterName(),namespace.getNamespaceName(),"未发布",items.get(i).getKey(),items.get(i).getValue());
+        itemInfoDTOs.add(itemInfoDTO);
+      }
+    }
+    return itemInfoDTOs;
   }
 
   @Transactional

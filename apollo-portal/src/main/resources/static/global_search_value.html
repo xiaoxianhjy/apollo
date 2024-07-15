@@ -1,0 +1,257 @@
+<!--
+  ~ Copyright 2024 Apollo Authors
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~
+-->
+<!doctype html>
+<html ng-app="global_search_value">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="icon" href="./img/config.png">
+    <!-- styles -->
+    <link rel="stylesheet" type="text/css" href="vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="vendor/angular/angular-toastr-1.4.1.min.css">
+    <link rel="stylesheet" type="text/css" href="vendor/select2/select2.min.css">
+    <link rel="stylesheet" type="text/css" media='all' href="vendor/angular/loading-bar.min.css">
+    <link rel="stylesheet" type="text/css" href="styles/common-style.css">
+
+    <title>{{'Global.Title' | translate }}</title>
+</head>
+
+<body>
+<apollonav></apollonav>
+<div class="container-fluid apollo-container" ng-controller="GlobalSearchValueController" ng-show="isRootUser">
+    <div class="col-md-10 col-md-offset-1 panel">
+        <ul class="nav nav-tabs">
+            <li role="presentation" ng-class="{false:'disabled'}[allowSwitchingTabs]" class="active" >
+                <a ng-disabled="!allowSwitchingTabs" style="border-left-style:none" href="#properties_value_search" data-toggle="tab">{{'Global.PropertiesValueSearch.Tab' | translate}}</a>
+            </li>
+            <li role="presentation" ng-class="{false:'disabled'}[allowSwitchingTabs]">
+                <a ng-disabled="!allowSwitchingTabs" href="#exclude_properties_value_search"  data-toggle="tab">{{'Global.ExcludePropertiesValueSearch.Tab' | translate}}</a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <div class="tab-pane fade in active" id="properties_value_search" style="background-color:#fff">
+                <section class="panel-body">
+                    <div class="row">
+                        <div ng-show="displayModule==='home'" >
+                            <div>
+                                <header class="panel-heading">
+                                    {{'Global.Title' | translate }}
+                                    <small>{{'Global.PropertiesValueSearch.Tips' | translate }}</small>
+                                </header>
+                                <div style="height: 15px"></div>
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="radio">
+                                            <label class="control-label">{{'ServiceConfig.Switch.Env' | translate}}：</label>
+                                            <label >
+                                                <input type="radio"  name="env" value="allenvs" ng-model="selectedPropertiesEnv" ng-click="switchPropertiesEnvs(selectedPropertiesEnv)"> 全部环境
+                                            </label>
+                                            <span ng-repeat="env in envs">
+                                                        <label >
+                                                          <input type="radio"  name="env" value="{{env}}" ng-model="selectedPropertiesEnv" ng-click="switchPropertiesEnvs(env)"> {{env}}
+                                                        </label>
+                                                    </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <hr/>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <form class="form-inline" style="display:inline">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="searchUserInputKey"
+                                                   placeholder="{{'Item.GlobalSearchByKey' | translate }}"
+                                                   ng-model="propertiesItemInfoSearchKey">
+                                            <input type="text" class="form-control" id="searchUserInputValue"
+                                                   placeholder="{{'Item.GlobalSearchByValue' | translate }}"
+                                                   ng-model="propertiesItemInfoSearchValue">
+                                        </div>
+                                        <button type="submit" class="btn btn-primary" ng-click="getPropertiesItemInfoByKeyAndValue(propertiesItemInfoSearchKey, propertiesItemInfoSearchValue)">
+                                            {{'Item.GlobalSearch' | translate }}
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            <div style="height: 15px"></div>
+
+
+                            <table class="table table-bordered table-striped table-hover">
+                                <tr>
+                                    <th style="text-align: left">{{'Global.App' | translate }}</th>
+                                    <th style="text-align: left">{{'Global.Env' | translate }}</th>
+                                    <th style="text-align: left">{{'Global.Cluster' | translate }}</th>
+                                    <th style="text-align: left">{{'Global.NameSpace' | translate }}</th>
+                                    <th style="text-align: left">{{'Global.status' | translate }}</th>
+                                    <th style="text-align: left">{{'Global.Key' | translate }}</th>
+                                    <th style="text-align: left">{{'Global.Value' | translate }}</th>
+                                </tr>
+                                <tr ng-repeat="item in propertiesItemInfo"  href="#" class="hover cursor-pointer">
+                                    <td>{{ item.appName }}</td>
+                                    <td>{{ item.envName }}</td>
+                                    <td>{{ item.clusterName }}</td>
+                                    <td>{{ item.namespaceName }}</td>
+                                    <td>{{ item.status }}</td>
+                                    <td>{{ item.key }}</td>
+                                    <td>{{ item.value }}</td>
+                                </tr>
+                            </table>
+
+                            <div style="text-align: end;">
+                            </div>
+                        </div>
+                        <div style="height: 15px"></div>
+                        <div style="background-color: white;" ng-show="propertiesItemInfo.length === 0">
+                            <div style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                                <div><img src="img/nodata.png" /></div>
+                                <div style="margin-left: 5px; color: grey;"><h5>{{'ApolloGlobalSearch.NoData' | translate }}</h5></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="tab-pane fade" id="exclude_properties_value_search" style="background-color:#fff">
+                <section class="panel-body">
+                    <div class="row">
+                        <div ng-show="displayModule==='home'" >
+                            <div>
+                                <header class="panel-heading">
+                                    {{'Global.Title' | translate }}
+                                    <small>{{'Global.ExcludePropertiesValueSearch.Tips' | translate }}</small>
+                                </header>
+                                <div style="height: 15px"></div>
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="radio">
+                                            <label class="control-label">{{'ServiceConfig.Switch.Env' | translate}}：</label>
+                                            <label >
+                                                <input type="radio"  name="excludeEnv" value="allenvs" ng-model="selectedExcludePropertiesEnv" ng-click="switchExcludePropertiesEnvs(selectedExcludePropertiesEnv)"> 全部环境
+                                            </label>
+                                            <span ng-repeat="env in envs">
+                                                        <label >
+                                                          <input type="radio"  name="excludeEnv" value="{{env}}" ng-model="selectedExcludePropertiesEnv" ng-click="switchExcludePropertiesEnvs(env)"> {{env}}
+                                                        </label>
+                                                    </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <hr/>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <form class="form-inline" style="display:inline">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="searchUserInputKey2"
+                                                   placeholder="{{'Item.GlobalSearchByValue' | translate }}"
+                                                   ng-model="excludePropertiesItemInfoSearchValue">
+                                        </div>
+                                        <button type="submit" class="btn btn-primary" ng-click="getExcludePropertiesItemInfoByValue(excludePropertiesItemInfoSearchValue)">
+                                            {{'Item.GlobalSearch' | translate }}
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            <div style="height: 15px"></div>
+
+
+                            <table class="table table-bordered table-striped table-hover">
+                                <tr>
+                                    <th style="text-align: left">{{'Global.App' | translate }}</th>
+                                    <th style="text-align: left">{{'Global.Env' | translate }}</th>
+                                    <th style="text-align: left">{{'Global.Cluster' | translate }}</th>
+                                    <th style="text-align: left">{{'Global.NameSpace' | translate }}</th>
+                                    <th style="text-align: left">{{'Global.status' | translate }}</th>
+                                    <th style="text-align: left">{{'Global.Key' | translate }}</th>
+                                    <th style="text-align: left">{{'Global.Value' | translate }}</th>
+                                </tr>
+                                <tr ng-repeat="item in excludePropertiesItemInfo" href="#" class="hover cursor-pointer">
+                                    <td>{{ item.appName }}</td>
+                                    <td>{{ item.envName }}</td>
+                                    <td>{{ item.clusterName }}</td>
+                                    <td>{{ item.namespaceName }}</td>
+                                    <td>{{ item.status }}</td>
+                                    <td>{{ item.key }}</td>
+                                    <td>{{ item.value }}</td>
+                                </tr>
+                            </table>
+
+                            <div style="text-align: end;">
+                            </div>
+                        </div>
+                        <div style="height: 15px"></div>
+                        <div style="background-color: white;" ng-show="excludePropertiesItemInfo.length === 0">
+                            <div style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                                <div><img src="img/nodata.png" /></div>
+                                <div style="margin-left: 5px; color: grey;"><h5>{{'ApolloGlobalSearch.NoData' | translate }}</h5></div>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div ng-include="'views/common/footer.html'"></div>
+
+<!--angular-->
+<script src="vendor/angular/angular.min.js"></script>
+<script src="vendor/angular/angular-resource.min.js"></script>
+<script src="vendor/angular/angular-toastr-1.4.1.tpls.min.js"></script>
+<script src="vendor/angular/loading-bar.min.js"></script>
+<script src="vendor/angular/angular-cookies.min.js"></script>
+
+<script src="vendor/angular/angular-translate.2.18.1/angular-translate.min.js"></script>
+<script src="vendor/angular/angular-translate.2.18.1/angular-translate-loader-static-files.min.js"></script>
+<script src="vendor/angular/angular-translate.2.18.1/angular-translate-storage-cookie.min.js"></script>
+
+<!-- jquery.js -->
+<script src="vendor/jquery.min.js" type="text/javascript"></script>
+<script src="vendor/select2/select2.min.js" type="text/javascript"></script>
+
+<!-- bootstrap.js -->
+<script src="vendor/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+<script src="vendor/diff.min.js" type="text/javascript"></script>
+
+<!--valdr-->
+<script src="vendor/valdr/valdr.min.js" type="text/javascript"></script>
+<script src="vendor/valdr/valdr-message.min.js" type="text/javascript"></script>
+
+<script type="application/javascript" src="scripts/app.js"></script>
+<script type="application/javascript" src="scripts/services/AppService.js"></script>
+<script type="application/javascript" src="scripts/services/EnvService.js"></script>
+<script type="application/javascript" src="scripts/services/GlobalSearchValueService.js"></script>
+<script type="application/javascript" src="scripts/services/UserService.js"></script>
+<script type="application/javascript" src="scripts/services/CommonService.js"></script>
+<script type="application/javascript" src="scripts/AppUtils.js"></script>
+<script type="application/javascript" src="scripts/services/OrganizationService.js"></script>
+<script type="application/javascript" src="scripts/directive/directive.js"></script>
+<script type="application/javascript" src="scripts/services/PermissionService.js"></script>
+
+<script type="application/javascript" src="scripts/controller/GlobalSearchValueController.js"></script>
+
+<script src="scripts/valdr.js" type="text/javascript"></script>
+
+</body>
+
+</html>
