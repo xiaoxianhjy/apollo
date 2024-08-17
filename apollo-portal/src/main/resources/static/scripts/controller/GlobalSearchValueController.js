@@ -197,6 +197,7 @@ function GlobalSearchValueController($scope, $window, $translate, toastr, AppUti
     function changePage(page) {
         if (page >= 1 && page <= $scope.totalPages) {
             $scope.currentPage = page;
+            $scope.isShowHighlightKeyword = [];
             const startIndex = ($scope.currentPage - 1)* parseInt($scope.pageSize, 10);
             const endIndex = Math.min(startIndex + parseInt($scope.pageSize, 10), $scope.totalItems);
             $scope.pageItemInfo = $scope.allItemInfo.slice(startIndex, endIndex);
