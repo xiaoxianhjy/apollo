@@ -43,6 +43,52 @@ public interface ItemRepository extends PagingAndSortingRepository<Item, Long> {
   
   Item findFirst1ByNamespaceIdOrderByLineNumDesc(Long namespaceId);
 
+  @Query(nativeQuery = true, value =
+          "SELECT " +
+                  "  n.AppId AS appId, " +
+                  "  n.ClusterName AS clusterName, " +
+                  "  n.NamespaceName AS namespaceName, " +
+                  "  i.`Key` AS `key`, " +
+                  "  i.`Value` AS `value`" +
+                  "FROM " +
+                  "  Item i " +
+                  "RIGHT JOIN Namespace n ON i.NamespaceId = n.Id " +
+                  "WHERE " +
+                  "  i.`Key` LIKE %?1% " +
+                  "  AND i.`Value` LIKE %?2% " +
+                  "  AND i.IsDeleted = 0")
+  List<Object[]> findItemsByKeyAndValueLike(String key, String value);
+
+  @Query(nativeQuery = true, value =
+          "SELECT "+
+                  "  n.AppId AS appId, " +
+                  "  n.ClusterName AS clusterName, " +
+                  "  n.NamespaceName AS namespaceName, " +
+                  "  i.`Key` AS `key`, " +
+                  "  i.`Value` AS `value` " +
+                  "FROM " +
+                  "  Item i " +
+                  "RIGHT JOIN Namespace n ON i.NamespaceId = n.Id " +
+                  "WHERE " +
+                  "  i.`Value` LIKE %?1% " +
+                  "  AND i.IsDeleted = 0")
+  List<Object[]> findItemsByValueLike(String value);
+
+  @Query(nativeQuery = true, value =
+          "SELECT"+
+                  "  n.AppId AS appId, " +
+                  "  n.ClusterName AS clusterName, " +
+                  "  n.NamespaceName AS namespaceName, " +
+                  "  i.`Key` AS `key`, " +
+                  "  i.`Value` AS `value` " +
+                  "FROM " +
+                  "  Item i " +
+                  "RIGHT JOIN Namespace n ON i.NamespaceId = n.Id " +
+                  "WHERE " +
+                  "  i.`Key` LIKE %?1% " +
+                  "  AND i.IsDeleted = 0 ")
+  List<Object[]> findItemsByKeyLike(String key);
+
   @Modifying
   @Query("update Item set IsDeleted = true, DeletedAt = ROUND(UNIX_TIMESTAMP(NOW(4))*1000), DataChange_LastModifiedBy = ?2 where NamespaceId = ?1 and IsDeleted = false")
   int deleteByNamespaceId(long namespaceId, String operator);

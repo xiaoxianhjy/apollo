@@ -18,11 +18,14 @@ package com.ctrip.framework.apollo.biz.service;
 
 import com.ctrip.framework.apollo.biz.AbstractIntegrationTest;
 import com.ctrip.framework.apollo.biz.entity.Item;
+import com.ctrip.framework.apollo.common.dto.ItemInfoDTO;
 import com.ctrip.framework.apollo.common.exception.BadRequestException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
+
+import java.util.List;
 
 public class ItemServiceTest extends AbstractIntegrationTest {
 
@@ -69,6 +72,28 @@ public class ItemServiceTest extends AbstractIntegrationTest {
         Item dbItem = itemService.update(item);
         Assert.assertEquals(2, dbItem.getType());
         Assert.assertEquals("v1-new", dbItem.getValue());
+    }
+
+    @Test
+    @Sql(scripts = {"/sql/namespace-test.sql","/sql/item-test.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "/sql/clean.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    public void testSearchItem() {
+        ItemInfoDTO itemInfoDTO = new ItemInfoDTO();
+        itemInfoDTO.setAppId("testApp");
+        itemInfoDTO.setClusterName("default");
+        itemInfoDTO.setNamespaceName("application");
+        itemInfoDTO.setStatus("0");
+        itemInfoDTO.setKey("k1");
+        itemInfoDTO.setValue("v1");
+
+        String itemKey = "k1";
+        String itemValue = "v1";
+        List<ItemInfoDTO> ExpectedItemInfoDTOSByKeyAndValue = itemService.getItemInfoBySearch(itemKey,itemValue);
+        List<ItemInfoDTO> ExpectedItemInfoDTOSByKey = itemService.getItemInfoBySearch(itemKey,"");
+        List<ItemInfoDTO> ExpectedItemInfoDTOSByValue = itemService.getItemInfoBySearch("",itemValue);
+        Assert.assertEquals(itemInfoDTO.toString(), ExpectedItemInfoDTOSByKeyAndValue.get(0).toString());
+        Assert.assertEquals(itemInfoDTO.toString(), ExpectedItemInfoDTOSByKey.get(0).toString());
+        Assert.assertEquals(itemInfoDTO.toString(), ExpectedItemInfoDTOSByValue.get(0).toString());
     }
 
 }

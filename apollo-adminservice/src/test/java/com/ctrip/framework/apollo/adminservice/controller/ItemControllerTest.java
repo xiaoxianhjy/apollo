@@ -21,10 +21,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.ctrip.framework.apollo.biz.entity.Commit;
 import com.ctrip.framework.apollo.biz.repository.CommitRepository;
 import com.ctrip.framework.apollo.biz.repository.ItemRepository;
-import com.ctrip.framework.apollo.common.dto.AppDTO;
-import com.ctrip.framework.apollo.common.dto.ClusterDTO;
-import com.ctrip.framework.apollo.common.dto.ItemDTO;
-import com.ctrip.framework.apollo.common.dto.NamespaceDTO;
+import com.ctrip.framework.apollo.biz.service.ItemService;
+import com.ctrip.framework.apollo.common.dto.*;
+
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import org.junit.Assert;
@@ -47,6 +47,9 @@ public class ItemControllerTest extends AbstractControllerTest {
 
   @Autowired
   private ItemRepository itemRepository;
+
+  @Autowired
+  private ItemService itemService;
 
   @Test
   @Sql(scripts = "/controller/test-itemset.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
@@ -149,5 +152,22 @@ public class ItemControllerTest extends AbstractControllerTest {
     List<Commit> commitList = commitRepository.findByAppIdAndClusterNameAndNamespaceNameOrderByIdDesc(app.getAppId(), cluster.getName(), namespace.getNamespaceName(),
         Pageable.ofSize(10));
     assertThat(commitList).hasSize(2);
+  }
+
+  @Test
+  @Sql(scripts = "/controller/test-itemset.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
+  @Sql(scripts = "/controller/cleanup.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
+  public void testSearch() {
+    this.testCreate();
+
+    String itemKey = "test-key";
+    String itemValue = "test-value";
+    List<Object[]> i = itemRepository.findItemsByKeyAndValueLike(itemKey,itemValue);
+    System.out.println(i.toString());
+    List<ItemInfoDTO> itemInfoDTOS = itemService.getItemInfoBySearch(itemKey, itemValue);
+    String searchUrl =  url("/items-search/key-and-value?key={key}&value={value}");
+    ItemInfoDTO[] resultArray = restTemplate.getForObject(searchUrl, ItemInfoDTO[].class, itemKey, itemValue);
+    List<ItemInfoDTO> expectedResult = Arrays.asList(resultArray);
+    assertThat(itemInfoDTOS.toString()).isEqualTo(expectedResult.toString());
   }
 }
