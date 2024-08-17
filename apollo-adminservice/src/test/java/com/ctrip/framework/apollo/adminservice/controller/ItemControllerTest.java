@@ -162,8 +162,6 @@ public class ItemControllerTest extends AbstractControllerTest {
 
     String itemKey = "test-key";
     String itemValue = "test-value";
-    List<Object[]> i = itemRepository.findItemsByKeyAndValueLike(itemKey,itemValue);
-    System.out.println(i.toString());
     List<ItemInfoDTO> itemInfoDTOS = itemService.getItemInfoBySearch(itemKey, itemValue);
     String searchUrl =  url("/items-search/key-and-value?key={key}&value={value}");
     ItemInfoDTO[] resultArray = restTemplate.getForObject(searchUrl, ItemInfoDTO[].class, itemKey, itemValue);
