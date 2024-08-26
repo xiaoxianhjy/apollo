@@ -38,6 +38,16 @@ public class ItemInfoDTO extends BaseDTO{
         this.value = value;
     }
 
+    public ItemInfoDTO(String appId, String clusterName, String namespaceName,
+                       String key, String value) {
+        this.appId = appId;
+        this.clusterName = clusterName;
+        this.namespaceName = namespaceName;
+        this.status = "0";
+        this.key = key;
+        this.value = value;
+    }
+
     public String getAppId() {
         return appId;
     }

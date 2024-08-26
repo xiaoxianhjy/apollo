@@ -44,4 +44,8 @@ public class GlobalSearchValueService {
         return perEnvItemInfos;
     }
 
+    public int count_PerEnv_ItemInfoNum_BySearch(Env env, String key, String value){
+        return itemAPI.countPerEnvItemInfoNumBySearch(env, key, value);
+    }
+
 }

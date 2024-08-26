@@ -32,6 +32,7 @@ import com.ctrip.framework.apollo.core.utils.StringUtils;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -152,36 +153,14 @@ public class ItemService {
   }
 
   public List<ItemInfoDTO> getItemInfoBySearch(String key, String value) {
-    List<ItemInfoDTO> itemInfoDTOs = new ArrayList<>();
-    List<Object[]> infos;
+    List<ItemInfoDTO> itemInfoDTOs;
+    Pageable pageable = PageRequest.of(0,200);
     if (key.isEmpty() && !value.isEmpty()) {
-      infos = itemRepository.findItemsByValueLike(value);
+      itemInfoDTOs = itemRepository.findItemsByValueLike(value, pageable);
     } else if (value.isEmpty() && !key.isEmpty()) {
-      infos = itemRepository.findItemsByKeyLike(key);
+      itemInfoDTOs = itemRepository.findItemsByKeyLike(key, pageable);
     } else {
-      infos = itemRepository.findItemsByKeyAndValueLike(key, value);
-    }
-
-    for (Object[] row : infos) {
-      ItemInfoDTO itemInfoDTO = new ItemInfoDTO();
-      itemInfoDTO.setAppId(String.valueOf(row[0]));
-      itemInfoDTO.setClusterName(String.valueOf(row[1]));
-      itemInfoDTO.setNamespaceName(String.valueOf(row[2]));
-      itemInfoDTO.setStatus("0");
-      itemInfoDTO.setKey(String.valueOf(row[3]));
-      if (row[4] instanceof String) {
-        itemInfoDTO.setValue(String.valueOf(row[4]));
-      } else if (row[4] instanceof Clob) {
-        try {
-          Clob clob = (Clob) row[4];
-          String valueStr = clob.getSubString(1, (int) clob.length());
-          System.out.println(valueStr);
-          itemInfoDTO.setValue(valueStr);
-        } catch (SQLException e) {
-          e.printStackTrace();
-        }
-      }
-      itemInfoDTOs.add(itemInfoDTO);
+      itemInfoDTOs = itemRepository.findItemsByKeyAndValueLike(key, value, pageable);
     }
 
     List<Release> releaseItems = releaseRepository.findAll();
@@ -199,6 +178,16 @@ public class ItemService {
       }
     }
     return itemInfoDTOs;
+  }
+
+  public int countItemInfoNumBySearch(String key, String value){
+    if (key.isEmpty() && !value.isEmpty()) {
+      return itemRepository.countItemNumByValueLike(value);
+    } else if (value.isEmpty() && !key.isEmpty()) {
+      return itemRepository.countItemNumByKeyLike(key);
+    } else {
+      return itemRepository.countItemNumByKeyAndValueLike(key, value);
+    }
   }
 
   @Transactional

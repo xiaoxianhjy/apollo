@@ -77,7 +77,7 @@
                                 <th style="text-align: left;width: 30%">{{'Global.Value' | translate }}</th>
                                 <th style="text-align: left;width: 10%">{{'Global.Operate' | translate }}</th>
                             </tr>
-                            <tr ng-repeat="item in pageItemInfo"  href="#" class="hover cursor-pointer">
+                            <tr ng-repeat="item in pageItemInfo track by $index"  href="#" class="hover cursor-pointer">
                                 <td>{{ item.appId }}</td>
                                 <td>{{ item.envName }}</td>
                                 <td>{{ item.clusterName }}</td>
@@ -105,15 +105,15 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <span ng-if="isDirectlyDisplayKey[$index] == '0'">{{ item.key }}</span>
-                                    <span ng-if="!(isDirectlyDisplayKey[$index] == '0')" ng-bind-html="highlightKeyword(item.key,needToBeHighlightedKey)"></span>
+                                    <span ng-if="isPageItemInfoDirectlyDisplayKey[$index] == '0'">{{ item.key }}</span>
+                                    <span ng-if="!(isPageItemInfoDirectlyDisplayKey[$index] == '0')" ng-bind-html="highlightKeyword(item.key,needToBeHighlightedKey)"></span>
                                 </td>
                                 <td>
-                                    <span ng-if="isDirectlyDisplayValue[$index] == '0'">{{ item.value }}</span>
-                                    <span ng-if="!(isDirectlyDisplayValue[$index] == '0')">
-                                        <span ng-show="(isDirectlyDisplayValue[$index] == '1') && (!isShowHighlightKeyword[$index])" ng-model="needToBeHighlightedValue">{{ needToBeHighlightedValue }}...</span>
-                                        <span ng-show="(isDirectlyDisplayValue[$index] == '2') && (!isShowHighlightKeyword[$index])" ng-model="needToBeHighlightedValue">...{{ needToBeHighlightedValue }}</span>
-                                        <span ng-show="(isDirectlyDisplayValue[$index] == '3') && (!isShowHighlightKeyword[$index])" ng-model="needToBeHighlightedValue">...{{ needToBeHighlightedValue }}...</span>
+                                    <span ng-if="isPageItemInfoDirectlyDisplayValue[$index] == '0'">{{ item.value }}</span>
+                                    <span ng-if="!(isPageItemInfoDirectlyDisplayValue[$index] == '0')">
+                                        <span ng-show="(isPageItemInfoDirectlyDisplayValue[$index] == '1') && (!isShowHighlightKeyword[$index])" ng-model="needToBeHighlightedValue">{{ needToBeHighlightedValue }}...</span>
+                                        <span ng-show="(isPageItemInfoDirectlyDisplayValue[$index] == '2') && (!isShowHighlightKeyword[$index])" ng-model="needToBeHighlightedValue">...{{ needToBeHighlightedValue }}</span>
+                                        <span ng-show="(isPageItemInfoDirectlyDisplayValue[$index] == '3') && (!isShowHighlightKeyword[$index])" ng-model="needToBeHighlightedValue">...{{ needToBeHighlightedValue }}...</span>
                                         <a ng-show="!isShowHighlightKeyword[$index]" href="#" ng-click="isShowAllValue($index)">| {{'Global.Expand' | translate }}</a>
                                         <span ng-show="isShowHighlightKeyword[$index]" ng-bind-html="highlightKeyword(item.value,needToBeHighlightedValue)"></span>
                                         <a ng-show="isShowHighlightKeyword[$index]" href="#" ng-click="isShowAllValue($index)">| {{'Global.Abbreviate' | translate }}</a>

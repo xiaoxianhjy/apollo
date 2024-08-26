@@ -37,11 +37,14 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GlobalSearchValueControllerTest {
@@ -90,14 +93,55 @@ public class GlobalSearchValueControllerTest {
     public void testGet_ItemInfo_BySearch_WithKeyAndValueAndActiveEnvs_ReturnEmptyItemInfos() throws Exception {
         activeEnvs.add(Env.DEV);
         when(globalSearchValueService.get_PerEnv_ItemInfo_BySearch(any(Env.class), anyString(), anyString())).thenReturn(new ArrayList<>());
+        List<ItemInfo> allEnvMockItemInfos = new ArrayList<>();
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> body = new HashMap<>();
+        body.put("data", allEnvMockItemInfos);
+        body.put("hasMoreData", false);
         mockMvc.perform(MockMvcRequestBuilders.get("/global-search/item-info/by-key-or-value")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("key", "query-key")
                         .param("value", "query-value"))
                 .andExpect(status().isOk())
-                .andExpect(content().json(String.valueOf(new ArrayList<>())));
+                .andExpect(content().json(objectMapper.writeValueAsString(body)));
         verify(portalSettings,times(1)).getActiveEnvs();
         verify(globalSearchValueService,times(1)).get_PerEnv_ItemInfo_BySearch(any(Env.class), anyString(), anyString());
+    }
+
+    @Test
+    public void testGet_ItemInfo_BySearch_WithKeyAndValueAndActiveEnvs_ReturnExpectedItemInfos_ButOverPerEnvLimit() throws Exception {
+        activeEnvs.add(Env.DEV);
+        activeEnvs.add(Env.PRO);
+        List<ItemInfo> devMockItemInfos = new ArrayList<>();
+        List<ItemInfo> proMockItemInfos = new ArrayList<>();
+        List<ItemInfo> allEnvMockItemInfos = new ArrayList<>();
+        devMockItemInfos.add(new ItemInfo("appid1","env1","cluster1","namespace1","status1","query-key","query-value"));
+        proMockItemInfos.add(new ItemInfo("appid2","env2","cluster2","namespace2","status2","query-key","query-value"));
+        when(globalSearchValueService.get_PerEnv_ItemInfo_BySearch(eq(Env.DEV), eq("query-key"), eq("query-value"))).thenReturn(devMockItemInfos);
+        when(globalSearchValueService.count_PerEnv_ItemInfoNum_BySearch(eq(Env.DEV), eq("query-key"), eq("query-value"))).thenReturn(201);
+        when(globalSearchValueService.get_PerEnv_ItemInfo_BySearch(eq(Env.PRO), eq("query-key"), eq("query-value"))).thenReturn(proMockItemInfos);
+        when(globalSearchValueService.count_PerEnv_ItemInfoNum_BySearch(eq(Env.PRO), eq("query-key"), eq("query-value"))).thenReturn(202);
+        allEnvMockItemInfos.addAll(devMockItemInfos);
+        allEnvMockItemInfos.addAll(proMockItemInfos);
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> body = new HashMap<>();
+        body.put("data", allEnvMockItemInfos);
+        body.put("hasMoreData", true);
+        String message = "In DEV , PRO , more than 200 items found (Exceeded the maximum search quantity for a single environment). Please enter more precise criteria to narrow down the search scope.";
+        body.put("message", message);
+        mockMvc.perform(MockMvcRequestBuilders.get("/global-search/item-info/by-key-or-value")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("key", "query-key")
+                        .param("value", "query-value"))
+                .andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(body)));
+        verify(portalSettings,times(1)).getActiveEnvs();
+        verify(globalSearchValueService, times(1)).get_PerEnv_ItemInfo_BySearch(eq(Env.DEV), eq("query-key"), eq("query-value"));
+        verify(globalSearchValueService, times(1)).count_PerEnv_ItemInfoNum_BySearch(eq(Env.DEV), eq("query-key"), eq("query-value"));
+        verify(globalSearchValueService, times(1)).get_PerEnv_ItemInfo_BySearch(eq(Env.PRO), eq("query-key"), eq("query-value"));
+        verify(globalSearchValueService, times(1)).count_PerEnv_ItemInfoNum_BySearch(eq(Env.PRO), eq("query-key"), eq("query-value"));
+        verify(globalSearchValueService, times(2)).get_PerEnv_ItemInfo_BySearch(any(Env.class), eq("query-key"), eq("query-value"));
+        verify(globalSearchValueService, times(2)).count_PerEnv_ItemInfoNum_BySearch(any(Env.class), eq("query-key"), eq("query-value"));
     }
 
     @Test
@@ -110,18 +154,27 @@ public class GlobalSearchValueControllerTest {
         devMockItemInfos.add(new ItemInfo("appid1","env1","cluster1","namespace1","status1","query-key","query-value"));
         proMockItemInfos.add(new ItemInfo("appid2","env2","cluster2","namespace2","status2","query-key","query-value"));
         when(globalSearchValueService.get_PerEnv_ItemInfo_BySearch(eq(Env.DEV), eq("query-key"), eq("query-value"))).thenReturn(devMockItemInfos);
+        when(globalSearchValueService.count_PerEnv_ItemInfoNum_BySearch(eq(Env.DEV), eq("query-key"), eq("query-value"))).thenReturn(200);
         when(globalSearchValueService.get_PerEnv_ItemInfo_BySearch(eq(Env.PRO), eq("query-key"), eq("query-value"))).thenReturn(proMockItemInfos);
+        when(globalSearchValueService.count_PerEnv_ItemInfoNum_BySearch(eq(Env.PRO), eq("query-key"), eq("query-value"))).thenReturn(199);
         allEnvMockItemInfos.addAll(devMockItemInfos);
         allEnvMockItemInfos.addAll(proMockItemInfos);
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> body = new HashMap<>();
+        body.put("data", allEnvMockItemInfos);
+        body.put("hasMoreData", false);
         mockMvc.perform(MockMvcRequestBuilders.get("/global-search/item-info/by-key-or-value")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("key", "query-key")
                         .param("value", "query-value"))
                 .andExpect(status().isOk())
-                .andExpect(content().json(new Gson().toJson(allEnvMockItemInfos)));
+                .andExpect(content().json(objectMapper.writeValueAsString(body)));
         verify(portalSettings,times(1)).getActiveEnvs();
         verify(globalSearchValueService, times(1)).get_PerEnv_ItemInfo_BySearch(eq(Env.DEV), eq("query-key"), eq("query-value"));
+        verify(globalSearchValueService, times(1)).count_PerEnv_ItemInfoNum_BySearch(eq(Env.DEV), eq("query-key"), eq("query-value"));
         verify(globalSearchValueService, times(1)).get_PerEnv_ItemInfo_BySearch(eq(Env.PRO), eq("query-key"), eq("query-value"));
+        verify(globalSearchValueService, times(1)).count_PerEnv_ItemInfoNum_BySearch(eq(Env.PRO), eq("query-key"), eq("query-value"));
         verify(globalSearchValueService, times(2)).get_PerEnv_ItemInfo_BySearch(any(Env.class), eq("query-key"), eq("query-value"));
+        verify(globalSearchValueService, times(2)).count_PerEnv_ItemInfoNum_BySearch(any(Env.class), eq("query-key"), eq("query-value"));
     }
 }

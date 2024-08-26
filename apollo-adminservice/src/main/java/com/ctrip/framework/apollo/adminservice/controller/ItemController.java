@@ -203,10 +203,15 @@ public class ItemController {
   }
 
   @GetMapping("/items-search/key-and-value")
-  public List<ItemInfoDTO> getItemInfoBySearch(@RequestParam(value = "key", required = false, defaultValue = "") String key,
-                                               @RequestParam(value = "value", required = false, defaultValue = "") String value) {
-    List<ItemInfoDTO> ItemInfoDTOs = itemService.getItemInfoBySearch(key, value);
-    return ItemInfoDTOs;
+  public List<ItemInfoDTO> getItemInfoBySearch(@RequestParam(value = "key", required = false) String key,
+                                               @RequestParam(value = "value", required = false) String value) {
+    return itemService.getItemInfoBySearch(key, value);
+  }
+
+  @GetMapping("/items-search/key-and-value/count")
+  public int countItemInfoNumBySearch(@RequestParam(value = "key", required = false) String key,
+                                      @RequestParam(value = "value", required = false) String value) {
+    return itemService.countItemInfoNumBySearch(key, value);
   }
 
   @GetMapping("/items/{itemId}")

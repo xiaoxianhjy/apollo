@@ -31,7 +31,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 @RestController
@@ -39,6 +42,7 @@ public class GlobalSearchValueController {
 
     private final PortalSettings portalSettings;
     private final GlobalSearchValueService globalSearchValueService;
+    private static final int MAX_SEARCH_RESULTS = 200;
 
     public GlobalSearchValueController(final PortalSettings portalSettings, final GlobalSearchValueService globalSearchValueService) {
         this.portalSettings = portalSettings;
@@ -51,14 +55,12 @@ public class GlobalSearchValueController {
                                                    @RequestParam(value = "value", required = false , defaultValue = "") String value) {
 
         if(key.isEmpty() && value.isEmpty()) {
-            String message = "Please enter at least one search criterion in either key or value.";
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(new Gson().toJson(message));
+                    .body(new Gson().toJson("Please enter at least one search criterion in either key or value."));
         }
 
-        List<ItemInfo> allEnvItemInfos = new ArrayList<>();
         List<Env> activeEnvs = portalSettings.getActiveEnvs();
         if(activeEnvs.isEmpty()){
             return ResponseEntity
@@ -68,17 +70,38 @@ public class GlobalSearchValueController {
 
         }
 
+        List<ItemInfo> allEnvItemInfos = new ArrayList<>();
+        List<String> envBeyondLimit = new ArrayList<>();
+        AtomicBoolean hasMoreData = new AtomicBoolean(false);
         activeEnvs.forEach(env -> {
             List<ItemInfo> perEnvItemInfos = globalSearchValueService.get_PerEnv_ItemInfo_BySearch(env, key, value);
+            int perEnvItemInfoNum = globalSearchValueService.count_PerEnv_ItemInfoNum_BySearch(env, key, value);
+            if(perEnvItemInfoNum > MAX_SEARCH_RESULTS){
+                envBeyondLimit.add(env.getName());
+                hasMoreData.set(true);
+            }
             allEnvItemInfos.addAll(perEnvItemInfos);
         });
 
+        Map<String, Object> body = new HashMap<>();
+        if(hasMoreData.get()){
+            body.put("data", allEnvItemInfos);
+            body.put("hasMoreData", true);
+            body.put("message", String.format(
+                    "In %s , more than %d items found (Exceeded the maximum search quantity for a single environment). Please enter more precise criteria to narrow down the search scope.",
+                    String.join(" , ", envBeyondLimit), MAX_SEARCH_RESULTS));
+            return ResponseEntity
+                    .ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(body);
+        }
+
+        body.put("data", allEnvItemInfos);
+        body.put("hasMoreData", false);
         return ResponseEntity
                 .ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(allEnvItemInfos);
-
-
+                .body(body);
     }
 
 }

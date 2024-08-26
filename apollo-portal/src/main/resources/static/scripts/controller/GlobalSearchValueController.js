@@ -26,8 +26,10 @@ function GlobalSearchValueController($scope, $window, $translate, toastr, AppUti
     $scope.needToBeHighlightedKey = '';
     $scope.needToBeHighlightedValue = '';
     $scope.isShowHighlightKeyword = [];
-    $scope.isDirectlyDisplayKey = [];
-    $scope.isDirectlyDisplayValue = [];
+    $scope.isAllItemInfoDirectlyDisplayKey = [];
+    $scope.isAllItemInfoDirectlyDisplayValue = [];
+    $scope.isPageItemInfoDirectlyDisplayKey = [];
+    $scope.isPageItemInfoDirectlyDisplayValue = [];
     $scope.currentPage = 1;
     $scope.pageSize = '10';
     $scope.totalItems = 0;
@@ -43,6 +45,8 @@ function GlobalSearchValueController($scope, $window, $translate, toastr, AppUti
     $scope.convertPageSizeToInt = convertPageSizeToInt;
     $scope.changePage = changePage;
     $scope.getPagesArray = getPagesArray;
+    $scope.determineDisplayValue = determineDisplayValue;
+    $scope.determineDisplayKey = determineDisplayKey;
 
     init();
     function init() {
@@ -62,119 +66,58 @@ function GlobalSearchValueController($scope, $window, $translate, toastr, AppUti
         $scope.itemInfoSearchValue = itemInfoSearchValue || '';
         $scope.allItemInfo = [];
         $scope.pageItemInfo = [];
+        $scope.isAllItemInfoDirectlyDisplayKey = [];
+        $scope.isPageItemInfoDirectlyDisplayKey = [];
+        $scope.isAllItemInfoDirectlyDisplayValue = [];
+        $scope.isPageItemInfoDirectlyDisplayValue = [];
         $scope.tempKey = itemInfoSearchKey || '';
         $scope.tempValue = itemInfoSearchValue || '';
         $scope.isShowHighlightKeyword = [];
         GlobalSearchValueService.findItemInfoByKeyAndValue($scope.itemInfoSearchKey, $scope.itemInfoSearchValue)
             .then(handleSuccess).catch(handleError);
         function handleSuccess(result) {
-            const itemInfo = [];
-            const isDirectlyDisplayValue = [];
-            const isDirectlyDisplayKey = [];
-            if(($scope.itemInfoSearchKey === '') && ($scope.itemInfoSearchValue === '')){
-                $scope.needToBeHighlightedValue = '';
-                $scope.needToBeHighlightedKey = '';
-                result.body.forEach((iteminfo, index) => {
-                    itemInfo.push(iteminfo);
-                    isDirectlyDisplayValue[index] = "0";
-                    isDirectlyDisplayKey[index] = "0";
-                });
-            }else if(($scope.itemInfoSearchKey === '') && !($scope.itemInfoSearchValue === '')){
+            let allItemInfo = [];
+            let isAllItemInfoDirectlyDisplayValue = [];
+            let isAllItemInfoDirectlyDisplayKey = [];
+            if(($scope.itemInfoSearchKey === '') && !($scope.itemInfoSearchValue === '')){
                 $scope.needToBeHighlightedValue = $scope.itemInfoSearchValue;
                 $scope.needToBeHighlightedKey = '';
-                result.forEach((iteminfo, index) => {
-                    itemInfo.push(iteminfo);
-                    if(iteminfo.value === $scope.needToBeHighlightedValue){
-                        isDirectlyDisplayValue[index] = "0";
-                        isDirectlyDisplayKey[index] = "0";
-                    }else{
-                        let position = iteminfo.value.indexOf($scope.needToBeHighlightedValue);
-                        if (position !== -1) {
-                            if (position === 0) {
-                                isDirectlyDisplayValue[index] = "1";
-                                isDirectlyDisplayKey[index] = "0";
-                            } else if (position + $scope.needToBeHighlightedValue.length === iteminfo.value.length) {
-                                isDirectlyDisplayValue[index] = "2";
-                                isDirectlyDisplayKey[index] = "0";
-                            } else {
-                                isDirectlyDisplayValue[index] = "3";
-                                isDirectlyDisplayKey[index] = "0";
-                            }
-                        } else {
-                            isDirectlyDisplayValue[index] = "-1";
-                            isDirectlyDisplayKey[index] = "-1";
-                        }
-                    }
+                result.data.forEach((itemInfo, index) => {
+                    allItemInfo.push(itemInfo);
+                    isAllItemInfoDirectlyDisplayValue[index] = determineDisplayValue(itemInfo.value, itemInfoSearchValue);
+                    isAllItemInfoDirectlyDisplayKey[index] = determineDisplayKey(itemInfo.key, '');
                 });
             }else if(!($scope.itemInfoSearchKey === '') && ($scope.itemInfoSearchValue === '')){
                 $scope.needToBeHighlightedKey = $scope.itemInfoSearchKey;
                 $scope.needToBeHighlightedValue = '';
-                result.forEach((iteminfo, index) => {
-                    itemInfo.push(iteminfo);
-                    if(iteminfo.key === $scope.needToBeHighlightedKey){
-                        isDirectlyDisplayValue[index] = "0";
-                        isDirectlyDisplayKey[index] = "0";
-                    }else{
-                        isDirectlyDisplayValue[index] = "0";
-                        isDirectlyDisplayKey[index] = "-1";
-                    }
-
+                result.data.forEach((itemInfo, index) => {
+                    allItemInfo.push(itemInfo);
+                    isAllItemInfoDirectlyDisplayKey[index] = determineDisplayKey(itemInfo.key, itemInfoSearchKey);
+                    isAllItemInfoDirectlyDisplayValue[index] = '0';
                 });
             }else{
                 $scope.needToBeHighlightedKey = $scope.itemInfoSearchKey;
                 $scope.needToBeHighlightedValue = $scope.itemInfoSearchValue;
-                result.forEach((iteminfo, index) => {
-                    itemInfo.push(iteminfo);
-                    if(iteminfo.key === $scope.needToBeHighlightedKey){
-                        isDirectlyDisplayKey[index] = "0";
-                        if(iteminfo.value === $scope.needToBeHighlightedValue){
-                            isDirectlyDisplayValue[index] = "0";
-                        }else{
-                            let position = iteminfo.value.indexOf($scope.needToBeHighlightedValue);
-                            if (position !== -1) {
-                                if (position === 0) {
-                                    isDirectlyDisplayValue[index] = "1";
-                                } else if (position + $scope.needToBeHighlightedValue.length === iteminfo.value.length) {
-                                    isDirectlyDisplayValue[index] = "2";
-                                } else {
-                                    isDirectlyDisplayValue[index] = "3";
-                                }
-                            } else {
-                                isDirectlyDisplayValue[index] = "-1";
-                                isDirectlyDisplayKey[index] = "-1";
-                            }
-                        }
-                    }else{
-                        isDirectlyDisplayKey[index] = "-1";
-                        if(iteminfo.value === $scope.needToBeHighlightedValue){
-                            isDirectlyDisplayValue[index] = "0";
-                        }else{
-                            let position = iteminfo.value.indexOf($scope.needToBeHighlightedValue);
-                            if (position !== -1) {
-                                if (position === 0) {
-                                    isDirectlyDisplayValue[index] = "1";
-                                } else if (position + $scope.needToBeHighlightedValue.length === iteminfo.value.length) {
-                                    isDirectlyDisplayValue[index] = "2";
-                                } else {
-                                    isDirectlyDisplayValue[index] = "3";
-                                }
-                            } else {
-                                isDirectlyDisplayValue[index] = "-1";
-                                isDirectlyDisplayKey[index] = "-1";
-                            }
-                        }
-                    }
+                result.data.forEach((itemInfo, index) => {
+                    allItemInfo.push(itemInfo);
+                    isAllItemInfoDirectlyDisplayValue[index] = determineDisplayValue(itemInfo.value, itemInfoSearchValue);
+                    isAllItemInfoDirectlyDisplayKey[index] = determineDisplayKey(itemInfo.key, itemInfoSearchKey);
                 });
             }
-            $scope.totalItems = itemInfo.length;
-            $scope.allItemInfo = itemInfo;
+            $scope.totalItems = allItemInfo.length;
+            $scope.allItemInfo = allItemInfo;
             $scope.totalPages = Math.ceil($scope.totalItems / parseInt($scope.pageSize, 10));
             const startIndex = ($scope.currentPage - 1) * parseInt($scope.pageSize, 10);
-            const endIndex = Math.min(startIndex + parseInt($scope.pageSize, 10), itemInfo.length);
-            $scope.pageItemInfo = itemInfo.slice(startIndex, endIndex);
-            $scope.isDirectlyDisplayValue = isDirectlyDisplayValue;
-            $scope.isDirectlyDisplayKey = isDirectlyDisplayKey;
+            const endIndex = Math.min(startIndex + parseInt($scope.pageSize, 10), allItemInfo.length);
+            $scope.pageItemInfo = allItemInfo.slice(startIndex, endIndex);
+            $scope.isAllItemInfoDirectlyDisplayValue = isAllItemInfoDirectlyDisplayValue;
+            $scope.isAllItemInfoDirectlyDisplayKey = isAllItemInfoDirectlyDisplayKey;
+            $scope.isPageItemInfoDirectlyDisplayValue = isAllItemInfoDirectlyDisplayValue.slice(startIndex, endIndex);
+            $scope.isPageItemInfoDirectlyDisplayKey = isAllItemInfoDirectlyDisplayKey.slice(startIndex, endIndex);
             getPagesArray();
+            if(result.hasMoreData){
+                toastr.warning(result.message, $translate.instant('Item.GlobalSearch.Tips'));
+            }
         }
 
         function handleError(error) {
@@ -198,9 +141,15 @@ function GlobalSearchValueController($scope, $window, $translate, toastr, AppUti
         if (page >= 1 && page <= $scope.totalPages) {
             $scope.currentPage = page;
             $scope.isShowHighlightKeyword = [];
+            $scope.isPageItemInfoDirectlyDisplayKey = [];
+            $scope.isPageItemInfoDirectlyDisplayValue = [];
+            $scope.itemInfoSearchKey = $scope.tempKey;
+            $scope.itemInfoSearchValue = $scope.tempValue;
             const startIndex = ($scope.currentPage - 1)* parseInt($scope.pageSize, 10);
             const endIndex = Math.min(startIndex + parseInt($scope.pageSize, 10), $scope.totalItems);
             $scope.pageItemInfo = $scope.allItemInfo.slice(startIndex, endIndex);
+            $scope.isPageItemInfoDirectlyDisplayValue = $scope.isAllItemInfoDirectlyDisplayValue.slice(startIndex, endIndex);
+            $scope.isPageItemInfoDirectlyDisplayKey = $scope.isAllItemInfoDirectlyDisplayKey.slice(startIndex, endIndex);
             getPagesArray();
         }
     }
@@ -238,6 +187,19 @@ function GlobalSearchValueController($scope, $window, $translate, toastr, AppUti
             }
         }
         $scope.pagesArray = pagesArray;
+    }
+
+    function determineDisplayValue(value, highlight) {
+        if (value === highlight) return '0';
+        const position = value.indexOf(highlight);
+        if (position === -1) return '-1';
+        if (position === 0) return '1';
+        if (position + highlight.length === value.length) return '2';
+        return "3";
+    }
+
+    function determineDisplayKey(key, highlight) {
+        return key === highlight ? '0' : '-1';
     }
 
     function jumpToTheEditingPage(appid,env,cluster){

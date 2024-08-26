@@ -17,7 +17,7 @@
 appService.service('GlobalSearchValueService', ['$resource', '$q', 'AppUtil', function ($resource, $q, AppUtil) {
     let global_search_resource = $resource('', {}, {
         get_item_Info_by_key_and_Value: {
-            isArray: true,
+            isArray: false,
             method: 'GET',
             url: AppUtil.prefixPath() + '/global-search/item-info/by-key-or-value',
             params: {

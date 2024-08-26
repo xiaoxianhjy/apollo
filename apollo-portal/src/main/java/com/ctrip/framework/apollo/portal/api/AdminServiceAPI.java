@@ -200,9 +200,16 @@ public class AdminServiceAPI {
 
     public List<ItemInfoDTO> getPerEnvItemInfoBySearch(Env env, String key, String value){
       ItemInfoDTO[] perEnvItemInfoDTOs =
-              restTemplate.get(env, "items-search/key-and-value?key={key}&value={value}",
-                      ItemInfoDTO[].class, key, value);
+          restTemplate.get(env, "items-search/key-and-value?key={key}&value={value}",
+              ItemInfoDTO[].class, key, value);
       return Arrays.asList(perEnvItemInfoDTOs);
+    }
+
+    public int countPerEnvItemInfoNumBySearch(Env env, String key, String value){
+      Integer count =
+          restTemplate.get(env, "items-search/key-and-value/count?key={key}&value={value}",
+              Integer.class, key, value);
+      return count == null ? 0 : count;
     }
 
     public ItemDTO loadItem(Env env, String appId, String clusterName, String namespaceName, String key) {
