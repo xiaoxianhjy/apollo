@@ -184,6 +184,9 @@ public class AdminServiceAPI {
     private final ParameterizedTypeReference<PageDTO<OpenItemDTO>> openItemPageDTO =
             new ParameterizedTypeReference<PageDTO<OpenItemDTO>>() {};
 
+    private final ParameterizedTypeReference<PageDTO<ItemInfoDTO>> pageItemInfoDTO =
+            new ParameterizedTypeReference<PageDTO<ItemInfoDTO>>() {};
+
     public List<ItemDTO> findItems(String appId, Env env, String clusterName, String namespaceName) {
       ItemDTO[] itemDTOs =
           restTemplate.get(env, "apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}/items",
@@ -198,18 +201,13 @@ public class AdminServiceAPI {
       return Arrays.asList(itemDTOs);
     }
 
-    public List<ItemInfoDTO> getPerEnvItemInfoBySearch(Env env, String key, String value){
-      ItemInfoDTO[] perEnvItemInfoDTOs =
-          restTemplate.get(env, "items-search/key-and-value?key={key}&value={value}",
-              ItemInfoDTO[].class, key, value);
-      return Arrays.asList(perEnvItemInfoDTOs);
-    }
-
-    public int countPerEnvItemInfoNumBySearch(Env env, String key, String value){
-      Integer count =
-          restTemplate.get(env, "items-search/key-and-value/count?key={key}&value={value}",
-              Integer.class, key, value);
-      return count == null ? 0 : count;
+    public PageDTO<ItemInfoDTO> getPerEnvItemInfoBySearch(Env env, String key, String value, int page, int size){
+      ResponseEntity<PageDTO<ItemInfoDTO>>
+              entity =
+              restTemplate.get(env,
+                      "items-search/key-and-value?key={key}&value={value}&page={page}&size={size}",
+                      pageItemInfoDTO, key, value, page, size);
+      return entity.getBody();
     }
 
     public ItemDTO loadItem(Env env, String appId, String clusterName, String namespaceName, String key) {

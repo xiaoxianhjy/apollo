@@ -23,6 +23,8 @@ import com.ctrip.framework.apollo.common.exception.BadRequestException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.jdbc.Sql;
 
 import java.util.List;
@@ -88,12 +90,13 @@ public class ItemServiceTest extends AbstractIntegrationTest {
 
         String itemKey = "k1";
         String itemValue = "v1";
-        List<ItemInfoDTO> ExpectedItemInfoDTOSByKeyAndValue = itemService.getItemInfoBySearch(itemKey,itemValue);
-        List<ItemInfoDTO> ExpectedItemInfoDTOSByKey = itemService.getItemInfoBySearch(itemKey,"");
-        List<ItemInfoDTO> ExpectedItemInfoDTOSByValue = itemService.getItemInfoBySearch("",itemValue);
-        Assert.assertEquals(itemInfoDTO.toString(), ExpectedItemInfoDTOSByKeyAndValue.get(0).toString());
-        Assert.assertEquals(itemInfoDTO.toString(), ExpectedItemInfoDTOSByKey.get(0).toString());
-        Assert.assertEquals(itemInfoDTO.toString(), ExpectedItemInfoDTOSByValue.get(0).toString());
+        Page<ItemInfoDTO> ExpectedItemInfoDTOSByKeyAndValue = itemService.getItemInfoBySearch(itemKey, itemValue, PageRequest.of(0,200));
+        Page<ItemInfoDTO> ExpectedItemInfoDTOSByKey = itemService.getItemInfoBySearch(itemKey,"", PageRequest.of(0,200));
+        Page<ItemInfoDTO> ExpectedItemInfoDTOSByValue = itemService.getItemInfoBySearch("", itemValue, PageRequest.of(0,200));
+        Assert.assertEquals(itemInfoDTO.toString(), ExpectedItemInfoDTOSByKeyAndValue.getContent().get(0).toString());
+        Assert.assertEquals(itemInfoDTO.toString(), ExpectedItemInfoDTOSByKey.getContent().get(0).toString());
+        Assert.assertEquals(itemInfoDTO.toString(), ExpectedItemInfoDTOSByValue.getContent().get(0).toString());
+
     }
 
 }

@@ -17,9 +17,11 @@
 package com.ctrip.framework.apollo.portal.service;
 
 import com.ctrip.framework.apollo.common.dto.ItemInfoDTO;
+import com.ctrip.framework.apollo.common.dto.PageDTO;
 import com.ctrip.framework.apollo.portal.api.AdminServiceAPI;
 import com.ctrip.framework.apollo.portal.entity.vo.ItemInfo;
 import com.ctrip.framework.apollo.portal.environment.Env;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -34,18 +36,14 @@ public class GlobalSearchValueService {
         this.itemAPI = itemAPI;
     }
 
-    public List<ItemInfo> get_PerEnv_ItemInfo_BySearch(Env env, String key, String value) {
+    public PageDTO<ItemInfo> get_PerEnv_ItemInfo_BySearch(Env env, String key, String value, int page, int size) {
         List<ItemInfo> perEnvItemInfos = new ArrayList<>();
-        List<ItemInfoDTO> perEnvItemInfoDTOs = itemAPI.getPerEnvItemInfoBySearch(env, key, value);
-        perEnvItemInfoDTOs.forEach(itemInfoDTO -> {
+        PageDTO<ItemInfoDTO> perEnvItemInfoDTOs = itemAPI.getPerEnvItemInfoBySearch(env, key, value, page, size);
+        perEnvItemInfoDTOs.getContent().forEach(itemInfoDTO -> {
             ItemInfo itemInfo = new ItemInfo(itemInfoDTO.getAppId(),env.getName(),itemInfoDTO.getClusterName(),itemInfoDTO.getNamespaceName(),itemInfoDTO.getStatus(),itemInfoDTO.getKey(),itemInfoDTO.getValue());
             perEnvItemInfos.add(itemInfo);
         });
-        return perEnvItemInfos;
-    }
-
-    public int count_PerEnv_ItemInfoNum_BySearch(Env env, String key, String value){
-        return itemAPI.countPerEnvItemInfoNumBySearch(env, key, value);
+        return new PageDTO<>(perEnvItemInfos, PageRequest.of(page, size), perEnvItemInfoDTOs.getTotal());
     }
 
 }

@@ -152,19 +152,18 @@ public class ItemService {
     return itemRepository.findByNamespaceId(namespace.getId(), pageable);
   }
 
-  public List<ItemInfoDTO> getItemInfoBySearch(String key, String value) {
-    List<ItemInfoDTO> itemInfoDTOs;
-    Pageable pageable = PageRequest.of(0,200);
+  public Page<ItemInfoDTO> getItemInfoBySearch(String key, String value, Pageable limit) {
+    Page<ItemInfoDTO> itemInfoDTOs;
     if (key.isEmpty() && !value.isEmpty()) {
-      itemInfoDTOs = itemRepository.findItemsByValueLike(value, pageable);
+      itemInfoDTOs = itemRepository.findItemsByValueLike(value, limit);
     } else if (value.isEmpty() && !key.isEmpty()) {
-      itemInfoDTOs = itemRepository.findItemsByKeyLike(key, pageable);
+      itemInfoDTOs = itemRepository.findItemsByKeyLike(key, limit);
     } else {
-      itemInfoDTOs = itemRepository.findItemsByKeyAndValueLike(key, value, pageable);
+      itemInfoDTOs = itemRepository.findItemsByKeyAndValueLike(key, value, limit);
     }
 
     List<Release> releaseItems = releaseRepository.findAll();
-    for (ItemInfoDTO itemInfoDTO : itemInfoDTOs) {
+    for (ItemInfoDTO itemInfoDTO : itemInfoDTOs.getContent()) {
       boolean isIncluded = false;
       for (Release releaseItem : releaseItems) {
         if (releaseItem.getConfigurations().contains(itemInfoDTO.getKey()) && releaseItem.getConfigurations().contains(itemInfoDTO.getValue())) {
@@ -178,16 +177,6 @@ public class ItemService {
       }
     }
     return itemInfoDTOs;
-  }
-
-  public int countItemInfoNumBySearch(String key, String value){
-    if (key.isEmpty() && !value.isEmpty()) {
-      return itemRepository.countItemNumByValueLike(value);
-    } else if (value.isEmpty() && !key.isEmpty()) {
-      return itemRepository.countItemNumByKeyLike(key);
-    } else {
-      return itemRepository.countItemNumByKeyAndValueLike(key, value);
-    }
   }
 
   @Transactional

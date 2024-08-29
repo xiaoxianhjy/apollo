@@ -17,7 +17,9 @@
 package com.ctrip.framework.apollo.portal.controller;
 
 
+import com.ctrip.framework.apollo.common.dto.PageDTO;
 import com.ctrip.framework.apollo.portal.component.PortalSettings;
+import com.ctrip.framework.apollo.portal.component.config.PortalConfig;
 import com.ctrip.framework.apollo.portal.entity.vo.ItemInfo;
 import com.ctrip.framework.apollo.portal.environment.Env;
 import com.ctrip.framework.apollo.portal.service.GlobalSearchValueService;
@@ -39,14 +41,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @RestController
 public class GlobalSearchValueController {
-
     private final PortalSettings portalSettings;
     private final GlobalSearchValueService globalSearchValueService;
-    private static final int MAX_SEARCH_RESULTS = 200;
+    private final PortalConfig portalConfig;
 
-    public GlobalSearchValueController(final PortalSettings portalSettings, final GlobalSearchValueService globalSearchValueService) {
+    public GlobalSearchValueController(final PortalSettings portalSettings, final GlobalSearchValueService globalSearchValueService, final PortalConfig portalConfig) {
         this.portalSettings = portalSettings;
         this.globalSearchValueService = globalSearchValueService;
+        this.portalConfig = portalConfig;
     }
 
     @PreAuthorize(value = "@permissionValidator.isSuperAdmin()")
@@ -74,13 +76,12 @@ public class GlobalSearchValueController {
         List<String> envBeyondLimit = new ArrayList<>();
         AtomicBoolean hasMoreData = new AtomicBoolean(false);
         activeEnvs.forEach(env -> {
-            List<ItemInfo> perEnvItemInfos = globalSearchValueService.get_PerEnv_ItemInfo_BySearch(env, key, value);
-            int perEnvItemInfoNum = globalSearchValueService.count_PerEnv_ItemInfoNum_BySearch(env, key, value);
-            if(perEnvItemInfoNum > MAX_SEARCH_RESULTS){
+            PageDTO<ItemInfo> perEnvItemInfos = globalSearchValueService.get_PerEnv_ItemInfo_BySearch(env, key, value,0, portalConfig.getPerEnvSearchMaxResults());
+            if(perEnvItemInfos.getTotal() > portalConfig.getPerEnvSearchMaxResults()){
                 envBeyondLimit.add(env.getName());
                 hasMoreData.set(true);
             }
-            allEnvItemInfos.addAll(perEnvItemInfos);
+            allEnvItemInfos.addAll(perEnvItemInfos.getContent());
         });
 
         Map<String, Object> body = new HashMap<>();
@@ -89,7 +90,7 @@ public class GlobalSearchValueController {
             body.put("hasMoreData", true);
             body.put("message", String.format(
                     "In %s , more than %d items found (Exceeded the maximum search quantity for a single environment). Please enter more precise criteria to narrow down the search scope.",
-                    String.join(" , ", envBeyondLimit), MAX_SEARCH_RESULTS));
+                    String.join(" , ", envBeyondLimit), portalConfig.getPerEnvSearchMaxResults()));
             return ResponseEntity
                     .ok()
                     .contentType(MediaType.APPLICATION_JSON)

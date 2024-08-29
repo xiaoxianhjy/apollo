@@ -203,15 +203,10 @@ public class ItemController {
   }
 
   @GetMapping("/items-search/key-and-value")
-  public List<ItemInfoDTO> getItemInfoBySearch(@RequestParam(value = "key", required = false) String key,
-                                               @RequestParam(value = "value", required = false) String value) {
-    return itemService.getItemInfoBySearch(key, value);
-  }
-
-  @GetMapping("/items-search/key-and-value/count")
-  public int countItemInfoNumBySearch(@RequestParam(value = "key", required = false) String key,
-                                      @RequestParam(value = "value", required = false) String value) {
-    return itemService.countItemInfoNumBySearch(key, value);
+  public PageDTO<ItemInfoDTO> getItemInfoBySearch(@RequestParam(value = "key", required = false) String key,
+                                                  @RequestParam(value = "value", required = false) String value,
+                                                  Pageable limit) {
+    return new PageDTO<>(itemService.getItemInfoBySearch(key, value, limit).getContent(), limit, itemService.getItemInfoBySearch(key, value, limit).getTotalElements());
   }
 
   @GetMapping("/items/{itemId}")

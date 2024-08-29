@@ -30,9 +30,11 @@ import java.util.Objects;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 
@@ -162,10 +164,16 @@ public class ItemControllerTest extends AbstractControllerTest {
 
     String itemKey = "test-key";
     String itemValue = "test-value";
-    List<ItemInfoDTO> itemInfoDTOS = itemService.getItemInfoBySearch(itemKey, itemValue);
-    String searchUrl =  url("/items-search/key-and-value?key={key}&value={value}");
-    ItemInfoDTO[] resultArray = restTemplate.getForObject(searchUrl, ItemInfoDTO[].class, itemKey, itemValue);
-    List<ItemInfoDTO> expectedResult = Arrays.asList(resultArray);
-    assertThat(itemInfoDTOS.toString()).isEqualTo(expectedResult.toString());
+    Page<ItemInfoDTO> itemInfoDTOS = itemService.getItemInfoBySearch(itemKey, itemValue, PageRequest.of(0, 200));
+    HttpHeaders headers = new HttpHeaders();
+    HttpEntity<Void> entity = new HttpEntity<>(headers);
+    ResponseEntity<PageDTO<ItemInfoDTO>> response = restTemplate.exchange(
+            url("/items-search/key-and-value?key={key}&value={value}&page={page}&size={size}"),
+            HttpMethod.GET,
+            entity,
+            new ParameterizedTypeReference<PageDTO<ItemInfoDTO>>() {},
+            itemKey, itemValue, 0, 200
+    );
+    assertThat(itemInfoDTOS.getContent().toString()).isEqualTo(response.getBody().getContent().toString());
   }
 }

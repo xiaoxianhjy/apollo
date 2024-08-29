@@ -48,26 +48,17 @@ public interface ItemRepository extends PagingAndSortingRepository<Item, Long> {
   @Query("SELECT new com.ctrip.framework.apollo.common.dto.ItemInfoDTO(n.appId, n.clusterName, n.namespaceName, i.key, i.value) " +
           "FROM Item i RIGHT JOIN Namespace n ON i.namespaceId = n.id " +
           "WHERE i.key LIKE %:key% AND i.value LIKE %:value% AND i.isDeleted = 0")
-  List<ItemInfoDTO> findItemsByKeyAndValueLike(@Param("key") String key, @Param("value") String value, Pageable pageable);
+  Page<ItemInfoDTO> findItemsByKeyAndValueLike(@Param("key") String key, @Param("value") String value, Pageable pageable);
 
   @Query("SELECT new com.ctrip.framework.apollo.common.dto.ItemInfoDTO(n.appId, n.clusterName, n.namespaceName, i.key, i.value) " +
           "FROM Item i RIGHT JOIN Namespace n ON i.namespaceId = n.id " +
           "WHERE i.key LIKE %:key% AND i.isDeleted = 0")
-  List<ItemInfoDTO> findItemsByKeyLike(@Param("key") String key, Pageable pageable);
+  Page<ItemInfoDTO> findItemsByKeyLike(@Param("key") String key, Pageable pageable);
 
   @Query("SELECT new com.ctrip.framework.apollo.common.dto.ItemInfoDTO(n.appId, n.clusterName, n.namespaceName, i.key, i.value) " +
           "FROM Item i RIGHT JOIN Namespace n ON i.namespaceId = n.id " +
           "WHERE i.value LIKE %:value% AND i.isDeleted = 0")
-  List<ItemInfoDTO> findItemsByValueLike(@Param("value") String value, Pageable pageable);
-
-  @Query("SELECT COUNT(i) FROM Item i RIGHT JOIN Namespace n ON i.namespaceId = n.id WHERE i.key LIKE %:key% AND i.isDeleted = 0")
-  int countItemNumByKeyLike(@Param("key") String key);
-
-  @Query("SELECT COUNT(i) FROM Item i RIGHT JOIN Namespace n ON i.namespaceId = n.id WHERE i.value LIKE %:value% AND i.isDeleted = 0")
-  int countItemNumByValueLike(@Param("value") String value);
-
-  @Query("SELECT COUNT(i) FROM Item i RIGHT JOIN Namespace n ON i.namespaceId = n.id WHERE i.key LIKE %:key% AND i.value LIKE %:value% AND i.isDeleted = 0")
-  int countItemNumByKeyAndValueLike(@Param("key") String key, @Param("value") String value);
+  Page<ItemInfoDTO> findItemsByValueLike(@Param("value") String value, Pageable pageable);
 
   @Modifying
   @Query("update Item set IsDeleted = true, DeletedAt = ROUND(UNIX_TIMESTAMP(NOW(4))*1000), DataChange_LastModifiedBy = ?2 where NamespaceId = ?1 and IsDeleted = false")
