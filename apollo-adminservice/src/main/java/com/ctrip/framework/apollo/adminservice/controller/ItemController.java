@@ -206,7 +206,8 @@ public class ItemController {
   public PageDTO<ItemInfoDTO> getItemInfoBySearch(@RequestParam(value = "key", required = false) String key,
                                                   @RequestParam(value = "value", required = false) String value,
                                                   Pageable limit) {
-    return new PageDTO<>(itemService.getItemInfoBySearch(key, value, limit).getContent(), limit, itemService.getItemInfoBySearch(key, value, limit).getTotalElements());
+    Page<ItemInfoDTO> pageItemInfoDTO = itemService.getItemInfoBySearch(key, value, limit);
+    return new PageDTO<>(pageItemInfoDTO.getContent(), limit, pageItemInfoDTO.getTotalElements());
   }
 
   @GetMapping("/items/{itemId}")

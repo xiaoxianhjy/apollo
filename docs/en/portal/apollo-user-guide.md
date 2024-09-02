@@ -482,6 +482,19 @@ Apollo has added an access key mechanism since version 1.6.0, so that only authe
 
 3. Client-side [configure access key](en/client/java-sdk-user-guide?id=_1244-configuring-access-keys) .
 
+## 6.3 System parameterization of global search configuration items
+
+Starting from version 2.4.0, apollo-portal adds the ability to globally search for configuration items by fuzzy retrieval of the key and value of a configuration item to find out which application, environment, cluster, or namespace the configuration item with the corresponding value is used in. In order to prevent memory overflow (OOM) problems when performing global view searches of configuration items, we introduce a system parameter `apollo.portal.search.perEnvMaxResults`, which is used to limit the number of maximum search results per environment configuration item in a single search. By default, this value is set to `200`, but administrators can adjust it to suit their actual needs.
+
+**Setting method：**
+
+1. Log in to the Apollo Configuration Center interface with a super administrator account.
+2. Just go to the `Administrator Tools - System Parameters` page and add or modify the `apollo.portal.search.perEnvMaxResults` configuration item.
+
+Please note that modifications to system parameters may affect the performance of the search function, so you should perform adequate testing and ensure that you understand exactly what the parameters do before making changes.
+
+![System-parameterization-of-global-search-configuration-items](../images/System-parameterization-of-global-search-configuration-items.png)
+
 # VII. Best practices
 
 ## 7.1 Security Related
