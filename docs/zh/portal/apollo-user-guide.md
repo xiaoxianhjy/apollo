@@ -466,7 +466,7 @@ Apollo从1.6.0版本开始增加访问密钥机制，从而只有经过身份验
 
 请注意，修改系统参数可能会影响搜索功能的性能，因此在修改之前应该进行充分的测试，并确保理解参数的具体作用。
 
-![System-parameterization-of-global-search-configuration-items](D:\project\pr lastdelast\docs\zh\images\System-parameterization-of-global-search-configuration-items.png)
+![System-parameterization-of-global-search-configuration-items](../images/System-parameterization-of-global-search-configuration-items.png)
 
 # 七、最佳实践
 
