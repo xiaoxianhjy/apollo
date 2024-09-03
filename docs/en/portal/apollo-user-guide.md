@@ -133,6 +133,20 @@ The rollback mechanism here is similar to the release system, where the rollback
 
 The rollback in Apollo is a similar mechanism. Clicking rollback rolls back the configuration published to the client to the previous published version, which means that the configuration read by the client will be restored to the previous version, but the configuration in the edited state on the page will not be rolled back, so that the developer can re-publish after fixing the configuration.
 
+## 1.7 Configuration queries (administrator privileges)
+
+After a configuration has been added, modified, or published, the administrator user can query and jump to modifications of the configuration item's ownership and publication status by going to the `Administrator Tools - Global Search for Value` page.
+
+The query here is a fuzzy search, where at least one of the key and value of the configuration item is searched to find out in which application, environment, cluster, namespace the configuration is used.
+
+- Properties format configuration can be retrieved directly from the key and value
+
+![Configuration query-properties](../images/Configuration query-properties.png)
+
+- xml, json, yml, yaml, txt and other formats configuration, because the storage of content-value storage, so you can key = content, value = configuration item content, retrieval
+
+![Configuration query-Non properties](../images/Configuration query-Non properties.png)
+
 # II. Public component access guide
 
 ## 2.1 Difference between public components and common applications
