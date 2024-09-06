@@ -24,7 +24,6 @@ import com.ctrip.framework.apollo.biz.repository.ItemRepository;
 import com.ctrip.framework.apollo.biz.service.ItemService;
 import com.ctrip.framework.apollo.common.dto.*;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import org.junit.Assert;
@@ -63,7 +62,7 @@ public class ItemControllerTest extends AbstractControllerTest {
     ClusterDTO cluster = restTemplate.getForObject(clusterBaseUrl(), ClusterDTO.class, app.getAppId(), "default");
     assert cluster != null;
     NamespaceDTO namespace = restTemplate.getForObject(namespaceBaseUrl(),
-        NamespaceDTO.class, app.getAppId(), cluster.getName(), "application");
+            NamespaceDTO.class, app.getAppId(), cluster.getName(), "application");
 
     String itemKey = "test-key";
     String itemValue = "test-value";
@@ -73,12 +72,12 @@ public class ItemControllerTest extends AbstractControllerTest {
     item.setDataChangeLastModifiedBy("apollo");
 
     ResponseEntity<ItemDTO> response = restTemplate.postForEntity(itemBaseUrl(),
-        item, ItemDTO.class, app.getAppId(), cluster.getName(), namespace.getNamespaceName());
+            item, ItemDTO.class, app.getAppId(), cluster.getName(), namespace.getNamespaceName());
     Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assert.assertEquals(itemKey, Objects.requireNonNull(response.getBody()).getKey());
 
     List<Commit> commitList = commitRepository.findByAppIdAndClusterNameAndNamespaceNameOrderByIdDesc(app.getAppId(), cluster.getName(), namespace.getNamespaceName(),
-        Pageable.ofSize(10));
+            Pageable.ofSize(10));
     Assert.assertEquals(1, commitList.size());
 
     Commit commit = commitList.get(0);
@@ -98,15 +97,15 @@ public class ItemControllerTest extends AbstractControllerTest {
     ClusterDTO cluster = restTemplate.getForObject(clusterBaseUrl(), ClusterDTO.class, app.getAppId(), "default");
     assert cluster != null;
     NamespaceDTO namespace = restTemplate.getForObject(namespaceBaseUrl(),
-        NamespaceDTO.class, app.getAppId(), cluster.getName(), "application");
+            NamespaceDTO.class, app.getAppId(), cluster.getName(), "application");
 
     String itemKey = "test-key";
     String itemValue = "test-value-updated";
 
     long itemId = itemRepository.findByKey(itemKey, Pageable.ofSize(1))
-        .getContent()
-        .get(0)
-        .getId();
+            .getContent()
+            .get(0)
+            .getId();
     ItemDTO item = new ItemDTO(itemKey, itemValue, "", 1);
     item.setDataChangeLastModifiedBy("apollo");
 
@@ -120,7 +119,7 @@ public class ItemControllerTest extends AbstractControllerTest {
     });
 
     List<Commit> commitList = commitRepository.findByAppIdAndClusterNameAndNamespaceNameOrderByIdDesc(app.getAppId(), cluster.getName(), namespace.getNamespaceName(),
-        Pageable.ofSize(10));
+            Pageable.ofSize(10));
     assertThat(commitList).hasSize(2);
   }
 
@@ -136,23 +135,23 @@ public class ItemControllerTest extends AbstractControllerTest {
     ClusterDTO cluster = restTemplate.getForObject(clusterBaseUrl(), ClusterDTO.class, app.getAppId(), "default");
     assert cluster != null;
     NamespaceDTO namespace = restTemplate.getForObject(namespaceBaseUrl(),
-        NamespaceDTO.class, app.getAppId(), cluster.getName(), "application");
+            NamespaceDTO.class, app.getAppId(), cluster.getName(), "application");
 
     String itemKey = "test-key";
 
     long itemId = itemRepository.findByKey(itemKey, Pageable.ofSize(1))
-        .getContent()
-        .get(0)
-        .getId();
+            .getContent()
+            .get(0)
+            .getId();
 
     String deleteUrl = url(  "/items/{itemId}?operator=apollo");
     restTemplate.delete(deleteUrl, itemId);
     assertThat(itemRepository.findById(itemId).isPresent())
-        .isFalse();
+            .isFalse();
 
     assert namespace != null;
     List<Commit> commitList = commitRepository.findByAppIdAndClusterNameAndNamespaceNameOrderByIdDesc(app.getAppId(), cluster.getName(), namespace.getNamespaceName(),
-        Pageable.ofSize(10));
+            Pageable.ofSize(10));
     assertThat(commitList).hasSize(2);
   }
 

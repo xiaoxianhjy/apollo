@@ -77,6 +77,9 @@ public class GlobalSearchValueController {
         AtomicBoolean hasMoreData = new AtomicBoolean(false);
         activeEnvs.forEach(env -> {
             PageDTO<ItemInfo> perEnvItemInfos = globalSearchValueService.get_PerEnv_ItemInfo_BySearch(env, key, value,0, portalConfig.getPerEnvSearchMaxResults());
+            if (!perEnvItemInfos.hasContent()) {
+                return;
+            }
             if(perEnvItemInfos.getTotal() > portalConfig.getPerEnvSearchMaxResults()){
                 envBeyondLimit.add(env.getName());
                 hasMoreData.set(true);

@@ -72,9 +72,8 @@
                                 <th style="text-align: left;width: 10%">{{'Global.Env' | translate }}</th>
                                 <th style="text-align: left;width: 10%">{{'Global.Cluster' | translate }}</th>
                                 <th style="text-align: left;width: 10%">{{'Global.NameSpace' | translate }}</th>
-                                <th style="text-align: left;width: 10%">{{'Global.Status' | translate }}</th>
-                                <th style="text-align: left;width: 10%">{{'Global.Key' | translate }}</th>
-                                <th style="text-align: left;width: 30%">{{'Global.Value' | translate }}</th>
+                                <th style="text-align: left;width: 15%">{{'Global.Key' | translate }}</th>
+                                <th style="text-align: left;width: 35%">{{'Global.Value' | translate }}</th>
                                 <th style="text-align: left;width: 10%">{{'Global.Operate' | translate }}</th>
                             </tr>
                             <tr ng-repeat="item in pageItemInfo track by $index"  href="#" class="hover cursor-pointer">
@@ -82,28 +81,6 @@
                                 <td>{{ item.envName }}</td>
                                 <td>{{ item.clusterName }}</td>
                                 <td>{{ item.namespaceName }}</td>
-                                <td>
-                                    <div class="status-container" style="display: flex; align-items: center;">
-                                        <div ng-show="item.status == '1'" class="status-icon icon1"
-                                             style="background: green;
-                                                    width: 8px;
-                                                    height: 8px;
-                                                    border-radius: 1px;
-                                                    margin-right: 5px;
-                                                    position: relative;
-                                                    order: 0;"></div>
-                                        <span ng-show="item.status == '1'" class="status-text" style="order: 1;">{{'Item.Published' | translate}}</span>
-                                        <div ng-show="item.status == '0'" class="status-icon icon2"
-                                             style="background: red;
-                                                    width: 8px;
-                                                    height: 8px;
-                                                    border-radius: 1px;
-                                                    margin-right: 5px;
-                                                    position: relative;
-                                                    order: 0;"></div>
-                                        <span ng-show="item.status == '0'" class="status-text" style="order: 1;">{{'Item.UnPublished' | translate}}</span>
-                                    </div>
-                                </td>
                                 <td>
                                     <span ng-if="isPageItemInfoDirectlyDisplayKey[$index] == '0'">{{ item.key }}</span>
                                     <span ng-if="!(isPageItemInfoDirectlyDisplayKey[$index] == '0')" ng-bind-html="highlightKeyword(item.key,needToBeHighlightedKey)"></span>

@@ -135,7 +135,7 @@ The rollback in Apollo is a similar mechanism. Clicking rollback rolls back the 
 
 ## 1.7 Configuration queries (administrator privileges)
 
-After a configuration has been added, modified, or published, the administrator user can query and jump to modifications of the configuration item's ownership and publication status by going to the `Administrator Tools - Global Search for Value` page.
+After a configuration has been added or modified, the administrator user can make a query for the configuration item it belongs to as well as jump to modifications by going to the `Administrator Tools - Global Search for Value` page.
 
 The query here is a fuzzy search, where at least one of the key and value of the configuration item is searched to find out in which application, environment, cluster, namespace the configuration is used.
 

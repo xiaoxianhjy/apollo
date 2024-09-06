@@ -21,9 +21,7 @@ import com.ctrip.framework.apollo.biz.config.BizConfig;
 import com.ctrip.framework.apollo.biz.entity.Audit;
 import com.ctrip.framework.apollo.biz.entity.Item;
 import com.ctrip.framework.apollo.biz.entity.Namespace;
-import com.ctrip.framework.apollo.biz.entity.Release;
 import com.ctrip.framework.apollo.biz.repository.ItemRepository;
-import com.ctrip.framework.apollo.biz.repository.ReleaseRepository;
 import com.ctrip.framework.apollo.common.dto.ItemInfoDTO;
 import com.ctrip.framework.apollo.common.exception.BadRequestException;
 import com.ctrip.framework.apollo.common.exception.NotFoundException;
@@ -32,13 +30,10 @@ import com.ctrip.framework.apollo.core.utils.StringUtils;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Clob;
-import java.sql.SQLException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -52,19 +47,16 @@ public class ItemService {
   private final NamespaceService namespaceService;
   private final AuditService auditService;
   private final BizConfig bizConfig;
-  private final ReleaseRepository releaseRepository;
 
   public ItemService(
       final ItemRepository itemRepository,
       final @Lazy NamespaceService namespaceService,
       final AuditService auditService,
-      final BizConfig bizConfig,
-      final ReleaseRepository releaseRepository) {
+      final BizConfig bizConfig) {
     this.itemRepository = itemRepository;
     this.namespaceService = namespaceService;
     this.auditService = auditService;
     this.bizConfig = bizConfig;
-    this.releaseRepository = releaseRepository;
   }
 
 
@@ -160,21 +152,6 @@ public class ItemService {
       itemInfoDTOs = itemRepository.findItemsByKeyLike(key, limit);
     } else {
       itemInfoDTOs = itemRepository.findItemsByKeyAndValueLike(key, value, limit);
-    }
-
-    List<Release> releaseItems = releaseRepository.findAll();
-    for (ItemInfoDTO itemInfoDTO : itemInfoDTOs.getContent()) {
-      boolean isIncluded = false;
-      for (Release releaseItem : releaseItems) {
-        if (releaseItem.getConfigurations().contains(itemInfoDTO.getKey()) && releaseItem.getConfigurations().contains(itemInfoDTO.getValue())) {
-          itemInfoDTO.setStatus("1");
-          isIncluded = true;
-          break;
-        }
-      }
-      if (!isIncluded) {
-        itemInfoDTO.setStatus("0");
-      }
     }
     return itemInfoDTOs;
   }

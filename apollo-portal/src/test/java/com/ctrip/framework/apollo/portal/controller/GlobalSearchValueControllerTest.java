@@ -111,7 +111,7 @@ public class GlobalSearchValueControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(body)));
         verify(portalSettings,times(1)).getActiveEnvs();
-        verify(portalConfig,times(2)).getPerEnvSearchMaxResults();
+        verify(portalConfig,times(1)).getPerEnvSearchMaxResults();
         verify(globalSearchValueService,times(1)).get_PerEnv_ItemInfo_BySearch(any(Env.class), anyString(), anyString(),eq(0),eq(perEnvSearchMaxResults));
     }
 
@@ -122,8 +122,8 @@ public class GlobalSearchValueControllerTest {
         List<ItemInfo> devMockItemInfos = new ArrayList<>();
         List<ItemInfo> proMockItemInfos = new ArrayList<>();
         List<ItemInfo> allEnvMockItemInfos = new ArrayList<>();
-        devMockItemInfos.add(new ItemInfo("appid1","env1","cluster1","namespace1","status1","query-key","query-value"));
-        proMockItemInfos.add(new ItemInfo("appid2","env2","cluster2","namespace2","status2","query-key","query-value"));
+        devMockItemInfos.add(new ItemInfo("appid1","env1","cluster1","namespace1","query-key","query-value"));
+        proMockItemInfos.add(new ItemInfo("appid2","env2","cluster2","namespace2","query-key","query-value"));
         when(globalSearchValueService.get_PerEnv_ItemInfo_BySearch(eq(Env.DEV), eq("query-key"), eq("query-value"),eq(0),eq(perEnvSearchMaxResults))).thenReturn(new PageDTO<>(devMockItemInfos, PageRequest.of(0,1), 201L));
         when(globalSearchValueService.get_PerEnv_ItemInfo_BySearch(eq(Env.PRO), eq("query-key"), eq("query-value"),eq(0),eq(perEnvSearchMaxResults))).thenReturn(new PageDTO<>(proMockItemInfos, PageRequest.of(0,1), 201L));
         allEnvMockItemInfos.addAll(devMockItemInfos);
@@ -154,8 +154,8 @@ public class GlobalSearchValueControllerTest {
         List<ItemInfo> devMockItemInfos = new ArrayList<>();
         List<ItemInfo> proMockItemInfos = new ArrayList<>();
         List<ItemInfo> allEnvMockItemInfos = new ArrayList<>();
-        devMockItemInfos.add(new ItemInfo("appid1","env1","cluster1","namespace1","status1","query-key","query-value"));
-        proMockItemInfos.add(new ItemInfo("appid2","env2","cluster2","namespace2","status2","query-key","query-value"));
+        devMockItemInfos.add(new ItemInfo("appid1","env1","cluster1","namespace1","query-key","query-value"));
+        proMockItemInfos.add(new ItemInfo("appid2","env2","cluster2","namespace2","query-key","query-value"));
         when(globalSearchValueService.get_PerEnv_ItemInfo_BySearch(eq(Env.DEV), eq("query-key"), eq("query-value"),eq(0),eq(perEnvSearchMaxResults))).thenReturn(new PageDTO<>(devMockItemInfos, PageRequest.of(0,1), 1L));
         when(globalSearchValueService.get_PerEnv_ItemInfo_BySearch(eq(Env.PRO), eq("query-key"), eq("query-value"),eq(0),eq(perEnvSearchMaxResults))).thenReturn(new PageDTO<>(proMockItemInfos, PageRequest.of(0,1), 1L));
         allEnvMockItemInfos.addAll(devMockItemInfos);

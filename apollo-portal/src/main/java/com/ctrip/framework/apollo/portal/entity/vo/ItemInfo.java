@@ -22,7 +22,6 @@ public class ItemInfo {
     private String envName;
     private String clusterName;
     private String namespaceName;
-    private String status;
     private String key;
     private String value;
 
@@ -30,12 +29,11 @@ public class ItemInfo {
     }
 
     public ItemInfo(String appId, String envName, String clusterName,
-                    String namespaceName, String status, String key, String value) {
+                    String namespaceName, String key, String value) {
         this.appId = appId;
         this.envName = envName;
         this.clusterName = clusterName;
         this.namespaceName = namespaceName;
-        this.status = status;
         this.key = key;
         this.value = value;
     }
@@ -72,14 +70,6 @@ public class ItemInfo {
         this.namespaceName = namespaceName;
     }
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
     public String getKey() {
         return key;
     }
@@ -103,7 +93,6 @@ public class ItemInfo {
                 ", envName='" + envName + '\'' +
                 ", clusterName='" + clusterName + '\'' +
                 ", namespaceName='" + namespaceName + '\'' +
-                ", status='" + status + '\'' +
                 ", key='" + key + '\'' +
                 ", value='" + value + '\'' +
                 '}';

@@ -21,29 +21,16 @@ public class ItemInfoDTO extends BaseDTO{
     private String appId;
     private String clusterName;
     private String namespaceName;
-    private String status;
     private String key;
     private String value;
 
     public ItemInfoDTO() {
     }
 
-    public ItemInfoDTO(String appId, String clusterName, String namespaceName,
-                       String status, String key, String value) {
+    public ItemInfoDTO(String appId, String clusterName, String namespaceName, String key, String value) {
         this.appId = appId;
         this.clusterName = clusterName;
         this.namespaceName = namespaceName;
-        this.status = status;
-        this.key = key;
-        this.value = value;
-    }
-
-    public ItemInfoDTO(String appId, String clusterName, String namespaceName,
-                       String key, String value) {
-        this.appId = appId;
-        this.clusterName = clusterName;
-        this.namespaceName = namespaceName;
-        this.status = "0";
         this.key = key;
         this.value = value;
     }
@@ -72,14 +59,6 @@ public class ItemInfoDTO extends BaseDTO{
         this.namespaceName = namespaceName;
     }
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
     public String getKey() {
         return key;
     }
@@ -102,7 +81,6 @@ public class ItemInfoDTO extends BaseDTO{
                 "appId='" + appId + '\'' +
                 ", clusterName='" + clusterName + '\'' +
                 ", namespaceName='" + namespaceName + '\'' +
-                ", status='" + status + '\'' +
                 ", key='" + key + '\'' +
                 ", value='" + value + '\'' +
                 '}';

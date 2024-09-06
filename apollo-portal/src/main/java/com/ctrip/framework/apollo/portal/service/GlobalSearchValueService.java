@@ -21,6 +21,8 @@ import com.ctrip.framework.apollo.common.dto.PageDTO;
 import com.ctrip.framework.apollo.portal.api.AdminServiceAPI;
 import com.ctrip.framework.apollo.portal.entity.vo.ItemInfo;
 import com.ctrip.framework.apollo.portal.environment.Env;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +32,7 @@ import java.util.List;
 @Service
 public class GlobalSearchValueService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalSearchValueService.class);
     private final AdminServiceAPI.ItemAPI itemAPI;
 
     public GlobalSearchValueService(AdminServiceAPI.ItemAPI itemAPI) {
@@ -40,8 +43,12 @@ public class GlobalSearchValueService {
         List<ItemInfo> perEnvItemInfos = new ArrayList<>();
         PageDTO<ItemInfoDTO> perEnvItemInfoDTOs = itemAPI.getPerEnvItemInfoBySearch(env, key, value, page, size);
         perEnvItemInfoDTOs.getContent().forEach(itemInfoDTO -> {
-            ItemInfo itemInfo = new ItemInfo(itemInfoDTO.getAppId(),env.getName(),itemInfoDTO.getClusterName(),itemInfoDTO.getNamespaceName(),itemInfoDTO.getStatus(),itemInfoDTO.getKey(),itemInfoDTO.getValue());
-            perEnvItemInfos.add(itemInfo);
+            try {
+                ItemInfo itemInfo = new ItemInfo(itemInfoDTO.getAppId(),env.getName(),itemInfoDTO.getClusterName(),itemInfoDTO.getNamespaceName(),itemInfoDTO.getKey(),itemInfoDTO.getValue());
+                perEnvItemInfos.add(itemInfo);
+            } catch (Exception e) {
+                LOGGER.error("Error converting ItemInfoDTO to ItemInfo for item: {}", itemInfoDTO, e);
+            }
         });
         return new PageDTO<>(perEnvItemInfos, PageRequest.of(page, size), perEnvItemInfoDTOs.getTotal());
     }

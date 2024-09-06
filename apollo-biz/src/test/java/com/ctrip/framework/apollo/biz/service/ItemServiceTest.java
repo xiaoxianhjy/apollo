@@ -27,8 +27,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.jdbc.Sql;
 
-import java.util.List;
-
 public class ItemServiceTest extends AbstractIntegrationTest {
 
     @Autowired
@@ -84,7 +82,6 @@ public class ItemServiceTest extends AbstractIntegrationTest {
         itemInfoDTO.setAppId("testApp");
         itemInfoDTO.setClusterName("default");
         itemInfoDTO.setNamespaceName("application");
-        itemInfoDTO.setStatus("0");
         itemInfoDTO.setKey("k1");
         itemInfoDTO.setValue("v1");
 
