@@ -30,16 +30,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class GlobalSearchValueService {
+public class GlobalSearchService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalSearchValueService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalSearchService.class);
     private final AdminServiceAPI.ItemAPI itemAPI;
 
-    public GlobalSearchValueService(AdminServiceAPI.ItemAPI itemAPI) {
+    public GlobalSearchService(AdminServiceAPI.ItemAPI itemAPI) {
         this.itemAPI = itemAPI;
     }
 
-    public PageDTO<ItemInfo> get_PerEnv_ItemInfo_BySearch(Env env, String key, String value, int page, int size) {
+    public PageDTO<ItemInfo> getPerEnvItemInfoBySearch(Env env, String key, String value, int page, int size) {
         List<ItemInfo> perEnvItemInfos = new ArrayList<>();
         PageDTO<ItemInfoDTO> perEnvItemInfoDTOs = itemAPI.getPerEnvItemInfoBySearch(env, key, value, page, size);
         perEnvItemInfoDTOs.getContent().forEach(itemInfoDTO -> {

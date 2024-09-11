@@ -42,13 +42,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
-public class GlobalSearchValueServiceTest {
+public class GlobalSearchServiceTest {
 
     @Mock
     private AdminServiceAPI.ItemAPI itemAPI;
 
     @InjectMocks
-    private GlobalSearchValueService globalSearchValueService;
+    private GlobalSearchService globalSearchService;
 
     private final int perEnvSearchMaxResults = 200;
 
@@ -58,7 +58,7 @@ public class GlobalSearchValueServiceTest {
         List<ItemInfoDTO> mockItemInfoDTOs = new ArrayList<>();
         mockItemInfoDTOs.add(itemInfoDTO);
         Mockito.when(itemAPI.getPerEnvItemInfoBySearch(any(Env.class), eq("TestKey"), eq("TestValue"), eq(0), eq(perEnvSearchMaxResults))).thenReturn(new PageDTO<>(mockItemInfoDTOs, PageRequest.of(0, 1), 1L));
-        PageDTO<ItemInfo> mockItemInfos = globalSearchValueService.get_PerEnv_ItemInfo_BySearch(Env.PRO, "TestKey", "TestValue", 0, 200);
+        PageDTO<ItemInfo> mockItemInfos = globalSearchService.getPerEnvItemInfoBySearch(Env.PRO, "TestKey", "TestValue", 0, 200);
         assertEquals(1, mockItemInfos.getContent().size());
         ItemInfo itemInfo = new ItemInfo("TestApp", Env.PRO.getName(), "TestCluster", "TestNamespace", "TestKey", "TestValue");
         List<ItemInfo> expectedResults = new ArrayList<>();
@@ -71,7 +71,7 @@ public class GlobalSearchValueServiceTest {
     public void testGet_PerEnv_ItemInfo_withKeyAndValue_BySearch_ReturnEmptyItemInfos() {
         Mockito.when(itemAPI.getPerEnvItemInfoBySearch(any(Env.class), anyString(), anyString(), eq(0), eq(perEnvSearchMaxResults)))
                 .thenReturn(new PageDTO<>(new ArrayList<>(), PageRequest.of(0, 1), 0L));
-        PageDTO<ItemInfo> result = globalSearchValueService.get_PerEnv_ItemInfo_BySearch(Env.PRO, "NonExistentKey", "NonExistentValue", 0, 200);
+        PageDTO<ItemInfo> result = globalSearchService.getPerEnvItemInfoBySearch(Env.PRO, "NonExistentKey", "NonExistentValue", 0, 200);
         assertEquals(0, result.getContent().size());
     }
 

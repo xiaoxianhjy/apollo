@@ -26,10 +26,12 @@ function GlobalSearchValueController($scope, $window, $translate, toastr, AppUti
     $scope.needToBeHighlightedKey = '';
     $scope.needToBeHighlightedValue = '';
     $scope.isShowHighlightKeyword = [];
-    $scope.isAllItemInfoDirectlyDisplayKey = [];
-    $scope.isAllItemInfoDirectlyDisplayValue = [];
-    $scope.isPageItemInfoDirectlyDisplayKey = [];
-    $scope.isPageItemInfoDirectlyDisplayValue = [];
+    $scope.isAllItemInfoDirectlyDisplayKeyWithoutShowHighlightKeyword = [];
+    $scope.isAllItemInfoDirectlyDisplayValueWithoutShowHighlightKeyword = [];
+    $scope.isAllItemInfoDisplayValueInARow = [];
+    $scope.isPageItemInfoDirectlyDisplayKeyWithoutShowHighlightKeyword = [];
+    $scope.isPageItemInfoDirectlyDisplayValueWithoutShowHighlightKeyword = [];
+    $scope.isPageItemInfoDisplayValueInARow = [];
     $scope.currentPage = 1;
     $scope.pageSize = '10';
     $scope.totalItems = 0;
@@ -45,8 +47,8 @@ function GlobalSearchValueController($scope, $window, $translate, toastr, AppUti
     $scope.convertPageSizeToInt = convertPageSizeToInt;
     $scope.changePage = changePage;
     $scope.getPagesArray = getPagesArray;
-    $scope.determineDisplayValue = determineDisplayValue;
-    $scope.determineDisplayKey = determineDisplayKey;
+    $scope.determineDisplayKeyOrValueWithoutShowHighlightKeyword = determineDisplayKeyOrValueWithoutShowHighlightKeyword;
+    $scope.determineDisplayValueInARow = determineDisplayValueInARow;
 
     init();
     function init() {
@@ -66,10 +68,12 @@ function GlobalSearchValueController($scope, $window, $translate, toastr, AppUti
         $scope.itemInfoSearchValue = itemInfoSearchValue || '';
         $scope.allItemInfo = [];
         $scope.pageItemInfo = [];
-        $scope.isAllItemInfoDirectlyDisplayKey = [];
-        $scope.isPageItemInfoDirectlyDisplayKey = [];
-        $scope.isAllItemInfoDirectlyDisplayValue = [];
-        $scope.isPageItemInfoDirectlyDisplayValue = [];
+        $scope.isAllItemInfoDirectlyDisplayKeyWithoutShowHighlightKeyword = [];
+        $scope.isAllItemInfoDirectlyDisplayValueWithoutShowHighlightKeyword = [];
+        $scope.isAllItemInfoDisplayValueInARow = [];
+        $scope.isPageItemInfoDirectlyDisplayKeyWithoutShowHighlightKeyword = [];
+        $scope.isPageItemInfoDirectlyDisplayValueWithoutShowHighlightKeyword = [];
+        $scope.isPageItemInfoDisplayValueInARow = [];
         $scope.tempKey = itemInfoSearchKey || '';
         $scope.tempValue = itemInfoSearchValue || '';
         $scope.isShowHighlightKeyword = [];
@@ -77,31 +81,34 @@ function GlobalSearchValueController($scope, $window, $translate, toastr, AppUti
             .then(handleSuccess).catch(handleError);
         function handleSuccess(result) {
             let allItemInfo = [];
-            let isAllItemInfoDirectlyDisplayValue = [];
-            let isAllItemInfoDirectlyDisplayKey = [];
+            let isAllItemInfoDirectlyDisplayValueWithoutShowHighlightKeyword = [];
+            let isAllItemInfoDirectlyDisplayKeyWithoutShowHighlightKeyword = [];
+            let isAllItemInfoDisplayValueInARow = [];
             if(($scope.itemInfoSearchKey === '') && !($scope.itemInfoSearchValue === '')){
                 $scope.needToBeHighlightedValue = $scope.itemInfoSearchValue;
                 $scope.needToBeHighlightedKey = '';
                 result.data.forEach((itemInfo, index) => {
                     allItemInfo.push(itemInfo);
-                    isAllItemInfoDirectlyDisplayValue[index] = determineDisplayValue(itemInfo.value, itemInfoSearchValue);
-                    isAllItemInfoDirectlyDisplayKey[index] = determineDisplayKey(itemInfo.key, '');
+                    isAllItemInfoDirectlyDisplayKeyWithoutShowHighlightKeyword[index] = '0';
+                    isAllItemInfoDirectlyDisplayValueWithoutShowHighlightKeyword[index] = determineDisplayKeyOrValueWithoutShowHighlightKeyword(itemInfo.value, itemInfoSearchValue);
+                    isAllItemInfoDisplayValueInARow[index] = determineDisplayValueInARow(itemInfo.value, itemInfoSearchValue);
                 });
             }else if(!($scope.itemInfoSearchKey === '') && ($scope.itemInfoSearchValue === '')){
                 $scope.needToBeHighlightedKey = $scope.itemInfoSearchKey;
                 $scope.needToBeHighlightedValue = '';
                 result.data.forEach((itemInfo, index) => {
                     allItemInfo.push(itemInfo);
-                    isAllItemInfoDirectlyDisplayKey[index] = determineDisplayKey(itemInfo.key, itemInfoSearchKey);
-                    isAllItemInfoDirectlyDisplayValue[index] = '0';
+                    isAllItemInfoDirectlyDisplayKeyWithoutShowHighlightKeyword[index] = determineDisplayKeyOrValueWithoutShowHighlightKeyword(itemInfo.key, itemInfoSearchKey);
+                    isAllItemInfoDirectlyDisplayValueWithoutShowHighlightKeyword[index] = '0';
                 });
             }else{
                 $scope.needToBeHighlightedKey = $scope.itemInfoSearchKey;
                 $scope.needToBeHighlightedValue = $scope.itemInfoSearchValue;
                 result.data.forEach((itemInfo, index) => {
                     allItemInfo.push(itemInfo);
-                    isAllItemInfoDirectlyDisplayValue[index] = determineDisplayValue(itemInfo.value, itemInfoSearchValue);
-                    isAllItemInfoDirectlyDisplayKey[index] = determineDisplayKey(itemInfo.key, itemInfoSearchKey);
+                    isAllItemInfoDirectlyDisplayValueWithoutShowHighlightKeyword[index] = determineDisplayKeyOrValueWithoutShowHighlightKeyword(itemInfo.value, itemInfoSearchValue);
+                    isAllItemInfoDirectlyDisplayKeyWithoutShowHighlightKeyword[index] = determineDisplayKeyOrValueWithoutShowHighlightKeyword(itemInfo.key, itemInfoSearchKey);
+                    isAllItemInfoDisplayValueInARow[index] = determineDisplayValueInARow(itemInfo.value, itemInfoSearchValue);
                 });
             }
             $scope.totalItems = allItemInfo.length;
@@ -110,10 +117,12 @@ function GlobalSearchValueController($scope, $window, $translate, toastr, AppUti
             const startIndex = ($scope.currentPage - 1) * parseInt($scope.pageSize, 10);
             const endIndex = Math.min(startIndex + parseInt($scope.pageSize, 10), allItemInfo.length);
             $scope.pageItemInfo = allItemInfo.slice(startIndex, endIndex);
-            $scope.isAllItemInfoDirectlyDisplayValue = isAllItemInfoDirectlyDisplayValue;
-            $scope.isAllItemInfoDirectlyDisplayKey = isAllItemInfoDirectlyDisplayKey;
-            $scope.isPageItemInfoDirectlyDisplayValue = isAllItemInfoDirectlyDisplayValue.slice(startIndex, endIndex);
-            $scope.isPageItemInfoDirectlyDisplayKey = isAllItemInfoDirectlyDisplayKey.slice(startIndex, endIndex);
+            $scope.isAllItemInfoDirectlyDisplayValueWithoutShowHighlightKeyword = isAllItemInfoDirectlyDisplayValueWithoutShowHighlightKeyword;
+            $scope.isAllItemInfoDirectlyDisplayKeyWithoutShowHighlightKeyword = isAllItemInfoDirectlyDisplayKeyWithoutShowHighlightKeyword;
+            $scope.isAllItemInfoDisplayValueInARow = isAllItemInfoDisplayValueInARow;
+            $scope.isPageItemInfoDirectlyDisplayValueWithoutShowHighlightKeyword = isAllItemInfoDirectlyDisplayValueWithoutShowHighlightKeyword.slice(startIndex, endIndex);
+            $scope.isPageItemInfoDirectlyDisplayKeyWithoutShowHighlightKeyword = isAllItemInfoDirectlyDisplayKeyWithoutShowHighlightKeyword.slice(startIndex, endIndex);
+            $scope.isPageItemInfoDisplayValueInARow = isAllItemInfoDisplayValueInARow.slice(startIndex, endIndex);
             getPagesArray();
             if(result.hasMoreData){
                 toastr.warning(result.message, $translate.instant('Item.GlobalSearch.Tips'));
@@ -141,15 +150,17 @@ function GlobalSearchValueController($scope, $window, $translate, toastr, AppUti
         if (page >= 1 && page <= $scope.totalPages) {
             $scope.currentPage = page;
             $scope.isShowHighlightKeyword = [];
-            $scope.isPageItemInfoDirectlyDisplayKey = [];
-            $scope.isPageItemInfoDirectlyDisplayValue = [];
+            $scope.isPageItemInfoDirectlyDisplayValueWithoutShowHighlightKeyword = [];
+            $scope.isPageItemInfoDirectlyDisplayKeyWithoutShowHighlightKeyword = [];
+            $scope.isPageItemInfoDisplayValueInARow = [];
             $scope.itemInfoSearchKey = $scope.tempKey;
             $scope.itemInfoSearchValue = $scope.tempValue;
             const startIndex = ($scope.currentPage - 1)* parseInt($scope.pageSize, 10);
             const endIndex = Math.min(startIndex + parseInt($scope.pageSize, 10), $scope.totalItems);
             $scope.pageItemInfo = $scope.allItemInfo.slice(startIndex, endIndex);
-            $scope.isPageItemInfoDirectlyDisplayValue = $scope.isAllItemInfoDirectlyDisplayValue.slice(startIndex, endIndex);
-            $scope.isPageItemInfoDirectlyDisplayKey = $scope.isAllItemInfoDirectlyDisplayKey.slice(startIndex, endIndex);
+            $scope.isPageItemInfoDirectlyDisplayValueWithoutShowHighlightKeyword = $scope.isAllItemInfoDirectlyDisplayValueWithoutShowHighlightKeyword.slice(startIndex, endIndex);
+            $scope.isPageItemInfoDirectlyDisplayKeyWithoutShowHighlightKeyword = $scope.isAllItemInfoDirectlyDisplayKeyWithoutShowHighlightKeyword.slice(startIndex, endIndex);
+            $scope.isPageItemInfoDisplayValueInARow = $scope.isAllItemInfoDisplayValueInARow.slice(startIndex, endIndex);
             getPagesArray();
         }
     }
@@ -189,8 +200,57 @@ function GlobalSearchValueController($scope, $window, $translate, toastr, AppUti
         $scope.pagesArray = pagesArray;
     }
 
-    function determineDisplayValue(value, highlight) {
-        if (value === highlight) return '0';
+    function determineDisplayValueInARow(value, highlight) {
+        var valueColumn = document.getElementById('valueColumn');
+        var testElement = document.createElement('span');
+        setupTestElement(testElement, valueColumn);
+        testElement.innerText = value;
+        document.body.appendChild(testElement);
+        const position = determinePosition(value, highlight);
+        let displayValue = '0';
+        if (testElement.scrollWidth > testElement.offsetWidth) {
+            displayValue = position;
+        } else {
+            if (testElement.scrollWidth === testElement.offsetWidth) {
+                return '0';
+            }
+            switch (position) {
+                case '1':
+                    testElement.innerText = value + '...' + '| ' + $translate.instant('Global.Expand');
+                    break;
+                case '2':
+                    testElement.innerText = '...' + value + '| ' + $translate.instant('Global.Expand');
+                    break;
+                case '3':
+                    testElement.innerText = '...' + value + '...' + '| ' + $translate.instant('Global.Expand');
+                    break;
+                default:
+                    return '0';
+            }
+            if (testElement.scrollWidth === testElement.offsetWidth) {
+                displayValue = '0';
+            } else {
+                displayValue = position;
+            }
+        }
+        document.body.removeChild(testElement);
+        return displayValue;
+    }
+
+    function setupTestElement(element, valueColumn) {
+        element.style.visibility = 'hidden';
+        element.style.position = 'absolute';
+        element.style.whiteSpace = 'nowrap';
+        element.style.display = 'inline-block';
+        element.style.fontFamily = '"Open Sans", sans-serif';
+        const devicePixelRatio = window.devicePixelRatio;
+        const zoomLevel = Math.round((window.outerWidth / window.innerWidth) * 100) / 100;
+        element.style.fontSize = `${13 * devicePixelRatio * zoomLevel}px`;
+        element.style.padding = `${8 * devicePixelRatio * zoomLevel}px`;
+        element.style.width = `${valueColumn.offsetWidth * devicePixelRatio * zoomLevel}px`;
+    }
+
+    function determinePosition(value, highlight) {
         const position = value.indexOf(highlight);
         if (position === -1) return '-1';
         if (position === 0) return '1';
@@ -198,8 +258,8 @@ function GlobalSearchValueController($scope, $window, $translate, toastr, AppUti
         return "3";
     }
 
-    function determineDisplayKey(key, highlight) {
-        return key === highlight ? '0' : '-1';
+    function determineDisplayKeyOrValueWithoutShowHighlightKeyword(keyorvalue, highlight) {
+        return keyorvalue === highlight ? '0' : '-1';
     }
 
     function jumpToTheEditingPage(appid,env,cluster){

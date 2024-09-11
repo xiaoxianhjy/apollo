@@ -22,7 +22,7 @@ import com.ctrip.framework.apollo.portal.component.PortalSettings;
 import com.ctrip.framework.apollo.portal.component.config.PortalConfig;
 import com.ctrip.framework.apollo.portal.entity.vo.ItemInfo;
 import com.ctrip.framework.apollo.portal.environment.Env;
-import com.ctrip.framework.apollo.portal.service.GlobalSearchValueService;
+import com.ctrip.framework.apollo.portal.service.GlobalSearchService;
 import com.google.gson.Gson;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -40,20 +40,20 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 
 @RestController
-public class GlobalSearchValueController {
+public class GlobalSearchController {
     private final PortalSettings portalSettings;
-    private final GlobalSearchValueService globalSearchValueService;
+    private final GlobalSearchService globalSearchService;
     private final PortalConfig portalConfig;
 
-    public GlobalSearchValueController(final PortalSettings portalSettings, final GlobalSearchValueService globalSearchValueService, final PortalConfig portalConfig) {
+    public GlobalSearchController(final PortalSettings portalSettings, final GlobalSearchService globalSearchService, final PortalConfig portalConfig) {
         this.portalSettings = portalSettings;
-        this.globalSearchValueService = globalSearchValueService;
+        this.globalSearchService = globalSearchService;
         this.portalConfig = portalConfig;
     }
 
     @PreAuthorize(value = "@permissionValidator.isSuperAdmin()")
     @GetMapping("/global-search/item-info/by-key-or-value")
-    public ResponseEntity<?> get_ItemInfo_BySearch(@RequestParam(value = "key", required = false, defaultValue = "") String key,
+    public ResponseEntity<?> getItemInfoBySearch(@RequestParam(value = "key", required = false, defaultValue = "") String key,
                                                    @RequestParam(value = "value", required = false , defaultValue = "") String value) {
 
         if(key.isEmpty() && value.isEmpty()) {
@@ -76,7 +76,7 @@ public class GlobalSearchValueController {
         List<String> envBeyondLimit = new ArrayList<>();
         AtomicBoolean hasMoreData = new AtomicBoolean(false);
         activeEnvs.forEach(env -> {
-            PageDTO<ItemInfo> perEnvItemInfos = globalSearchValueService.get_PerEnv_ItemInfo_BySearch(env, key, value,0, portalConfig.getPerEnvSearchMaxResults());
+            PageDTO<ItemInfo> perEnvItemInfos = globalSearchService.getPerEnvItemInfoBySearch(env, key, value,0, portalConfig.getPerEnvSearchMaxResults());
             if (!perEnvItemInfos.hasContent()) {
                 return;
             }

@@ -25,7 +25,7 @@ import com.ctrip.framework.apollo.portal.component.PortalSettings;
 import com.ctrip.framework.apollo.portal.component.config.PortalConfig;
 import com.ctrip.framework.apollo.portal.entity.vo.ItemInfo;
 import com.ctrip.framework.apollo.portal.environment.Env;
-import com.ctrip.framework.apollo.portal.service.GlobalSearchValueService;
+import com.ctrip.framework.apollo.portal.service.GlobalSearchService;
 import com.google.gson.Gson;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,7 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RunWith(MockitoJUnitRunner.class)
-public class GlobalSearchValueControllerTest {
+public class GlobalSearchControllerTest {
 
     private MockMvc mockMvc;
 
@@ -58,10 +58,10 @@ public class GlobalSearchValueControllerTest {
     private PortalConfig portalConfig;
 
     @Mock
-    private GlobalSearchValueService globalSearchValueService;
+    private GlobalSearchService globalSearchService;
 
     @InjectMocks
-    private GlobalSearchValueController globalSearchValueController;
+    private GlobalSearchController globalSearchController;
 
     private final List<Env> activeEnvs = new ArrayList<>();
 
@@ -71,7 +71,7 @@ public class GlobalSearchValueControllerTest {
     public void setUp() {
         when(portalSettings.getActiveEnvs()).thenReturn(activeEnvs);
         when(portalConfig.getPerEnvSearchMaxResults()).thenReturn(perEnvSearchMaxResults);
-        mockMvc = MockMvcBuilders.standaloneSetup(globalSearchValueController).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(globalSearchController).build();
     }
 
     @Test
@@ -98,7 +98,7 @@ public class GlobalSearchValueControllerTest {
     @Test
     public void testGet_ItemInfo_BySearch_WithKeyAndValueAndActiveEnvs_ReturnEmptyItemInfos() throws Exception {
         activeEnvs.add(Env.DEV);
-        when(globalSearchValueService.get_PerEnv_ItemInfo_BySearch(any(Env.class), anyString(), anyString(),eq(0),eq(perEnvSearchMaxResults))).thenReturn(new PageDTO<>(new ArrayList<>(), PageRequest.of(0,1), 0L));
+        when(globalSearchService.getPerEnvItemInfoBySearch(any(Env.class), anyString(), anyString(),eq(0),eq(perEnvSearchMaxResults))).thenReturn(new PageDTO<>(new ArrayList<>(), PageRequest.of(0,1), 0L));
         List<ItemInfo> allEnvMockItemInfos = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Object> body = new HashMap<>();
@@ -112,7 +112,7 @@ public class GlobalSearchValueControllerTest {
                 .andExpect(content().json(objectMapper.writeValueAsString(body)));
         verify(portalSettings,times(1)).getActiveEnvs();
         verify(portalConfig,times(1)).getPerEnvSearchMaxResults();
-        verify(globalSearchValueService,times(1)).get_PerEnv_ItemInfo_BySearch(any(Env.class), anyString(), anyString(),eq(0),eq(perEnvSearchMaxResults));
+        verify(globalSearchService,times(1)).getPerEnvItemInfoBySearch(any(Env.class), anyString(), anyString(),eq(0),eq(perEnvSearchMaxResults));
     }
 
     @Test
@@ -124,8 +124,8 @@ public class GlobalSearchValueControllerTest {
         List<ItemInfo> allEnvMockItemInfos = new ArrayList<>();
         devMockItemInfos.add(new ItemInfo("appid1","env1","cluster1","namespace1","query-key","query-value"));
         proMockItemInfos.add(new ItemInfo("appid2","env2","cluster2","namespace2","query-key","query-value"));
-        when(globalSearchValueService.get_PerEnv_ItemInfo_BySearch(eq(Env.DEV), eq("query-key"), eq("query-value"),eq(0),eq(perEnvSearchMaxResults))).thenReturn(new PageDTO<>(devMockItemInfos, PageRequest.of(0,1), 201L));
-        when(globalSearchValueService.get_PerEnv_ItemInfo_BySearch(eq(Env.PRO), eq("query-key"), eq("query-value"),eq(0),eq(perEnvSearchMaxResults))).thenReturn(new PageDTO<>(proMockItemInfos, PageRequest.of(0,1), 201L));
+        when(globalSearchService.getPerEnvItemInfoBySearch(eq(Env.DEV), eq("query-key"), eq("query-value"),eq(0),eq(perEnvSearchMaxResults))).thenReturn(new PageDTO<>(devMockItemInfos, PageRequest.of(0,1), 201L));
+        when(globalSearchService.getPerEnvItemInfoBySearch(eq(Env.PRO), eq("query-key"), eq("query-value"),eq(0),eq(perEnvSearchMaxResults))).thenReturn(new PageDTO<>(proMockItemInfos, PageRequest.of(0,1), 201L));
         allEnvMockItemInfos.addAll(devMockItemInfos);
         allEnvMockItemInfos.addAll(proMockItemInfos);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -142,9 +142,9 @@ public class GlobalSearchValueControllerTest {
                 .andExpect(content().json(objectMapper.writeValueAsString(body)));
         verify(portalSettings,times(1)).getActiveEnvs();
         verify(portalConfig,times(5)).getPerEnvSearchMaxResults();
-        verify(globalSearchValueService, times(1)).get_PerEnv_ItemInfo_BySearch(eq(Env.DEV), eq("query-key"), eq("query-value"),eq(0),eq(perEnvSearchMaxResults));
-        verify(globalSearchValueService, times(1)).get_PerEnv_ItemInfo_BySearch(eq(Env.PRO), eq("query-key"), eq("query-value"),eq(0),eq(perEnvSearchMaxResults));
-        verify(globalSearchValueService, times(2)).get_PerEnv_ItemInfo_BySearch(any(Env.class), eq("query-key"), eq("query-value"),eq(0),eq(perEnvSearchMaxResults));
+        verify(globalSearchService, times(1)).getPerEnvItemInfoBySearch(eq(Env.DEV), eq("query-key"), eq("query-value"),eq(0),eq(perEnvSearchMaxResults));
+        verify(globalSearchService, times(1)).getPerEnvItemInfoBySearch(eq(Env.PRO), eq("query-key"), eq("query-value"),eq(0),eq(perEnvSearchMaxResults));
+        verify(globalSearchService, times(2)).getPerEnvItemInfoBySearch(any(Env.class), eq("query-key"), eq("query-value"),eq(0),eq(perEnvSearchMaxResults));
     }
 
     @Test
@@ -156,8 +156,8 @@ public class GlobalSearchValueControllerTest {
         List<ItemInfo> allEnvMockItemInfos = new ArrayList<>();
         devMockItemInfos.add(new ItemInfo("appid1","env1","cluster1","namespace1","query-key","query-value"));
         proMockItemInfos.add(new ItemInfo("appid2","env2","cluster2","namespace2","query-key","query-value"));
-        when(globalSearchValueService.get_PerEnv_ItemInfo_BySearch(eq(Env.DEV), eq("query-key"), eq("query-value"),eq(0),eq(perEnvSearchMaxResults))).thenReturn(new PageDTO<>(devMockItemInfos, PageRequest.of(0,1), 1L));
-        when(globalSearchValueService.get_PerEnv_ItemInfo_BySearch(eq(Env.PRO), eq("query-key"), eq("query-value"),eq(0),eq(perEnvSearchMaxResults))).thenReturn(new PageDTO<>(proMockItemInfos, PageRequest.of(0,1), 1L));
+        when(globalSearchService.getPerEnvItemInfoBySearch(eq(Env.DEV), eq("query-key"), eq("query-value"),eq(0),eq(perEnvSearchMaxResults))).thenReturn(new PageDTO<>(devMockItemInfos, PageRequest.of(0,1), 1L));
+        when(globalSearchService.getPerEnvItemInfoBySearch(eq(Env.PRO), eq("query-key"), eq("query-value"),eq(0),eq(perEnvSearchMaxResults))).thenReturn(new PageDTO<>(proMockItemInfos, PageRequest.of(0,1), 1L));
         allEnvMockItemInfos.addAll(devMockItemInfos);
         allEnvMockItemInfos.addAll(proMockItemInfos);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -171,8 +171,8 @@ public class GlobalSearchValueControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(body)));
         verify(portalSettings,times(1)).getActiveEnvs();
-        verify(globalSearchValueService, times(1)).get_PerEnv_ItemInfo_BySearch(eq(Env.DEV), eq("query-key"), eq("query-value"),eq(0),eq(perEnvSearchMaxResults));
-        verify(globalSearchValueService, times(1)).get_PerEnv_ItemInfo_BySearch(eq(Env.PRO), eq("query-key"), eq("query-value"),eq(0),eq(perEnvSearchMaxResults));
-        verify(globalSearchValueService, times(2)).get_PerEnv_ItemInfo_BySearch(any(Env.class), eq("query-key"), eq("query-value"),eq(0),eq(perEnvSearchMaxResults));
+        verify(globalSearchService, times(1)).getPerEnvItemInfoBySearch(eq(Env.DEV), eq("query-key"), eq("query-value"),eq(0),eq(perEnvSearchMaxResults));
+        verify(globalSearchService, times(1)).getPerEnvItemInfoBySearch(eq(Env.PRO), eq("query-key"), eq("query-value"),eq(0),eq(perEnvSearchMaxResults));
+        verify(globalSearchService, times(2)).getPerEnvItemInfoBySearch(any(Env.class), eq("query-key"), eq("query-value"),eq(0),eq(perEnvSearchMaxResults));
     }
 }
