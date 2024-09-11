@@ -245,9 +245,9 @@ function GlobalSearchValueController($scope, $window, $translate, toastr, AppUti
         element.style.fontFamily = '"Open Sans", sans-serif';
         const devicePixelRatio = window.devicePixelRatio;
         const zoomLevel = Math.round((window.outerWidth / window.innerWidth) * 100) / 100;
-        element.style.fontSize = `${13 * devicePixelRatio * zoomLevel}px`;
-        element.style.padding = `${8 * devicePixelRatio * zoomLevel}px`;
-        element.style.width = `${valueColumn.offsetWidth * devicePixelRatio * zoomLevel}px`;
+        element.style.fontSize = 13 * devicePixelRatio * zoomLevel + 'px';
+        element.style.padding = 8 * devicePixelRatio * zoomLevel + 'px';
+        element.style.width = valueColumn.offsetWidth * devicePixelRatio * zoomLevel + 'px';
     }
 
     function determinePosition(value, highlight) {
