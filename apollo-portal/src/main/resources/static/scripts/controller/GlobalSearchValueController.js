@@ -87,7 +87,7 @@ function GlobalSearchValueController($scope, $window, $translate, toastr, AppUti
             if(($scope.itemInfoSearchKey === '') && !($scope.itemInfoSearchValue === '')){
                 $scope.needToBeHighlightedValue = $scope.itemInfoSearchValue;
                 $scope.needToBeHighlightedKey = '';
-                result.data.forEach((itemInfo, index) => {
+                result.body.forEach((itemInfo, index) => {
                     allItemInfo.push(itemInfo);
                     isAllItemInfoDirectlyDisplayKeyWithoutShowHighlightKeyword[index] = '0';
                     isAllItemInfoDirectlyDisplayValueWithoutShowHighlightKeyword[index] = determineDisplayKeyOrValueWithoutShowHighlightKeyword(itemInfo.value, itemInfoSearchValue);
@@ -96,7 +96,7 @@ function GlobalSearchValueController($scope, $window, $translate, toastr, AppUti
             }else if(!($scope.itemInfoSearchKey === '') && ($scope.itemInfoSearchValue === '')){
                 $scope.needToBeHighlightedKey = $scope.itemInfoSearchKey;
                 $scope.needToBeHighlightedValue = '';
-                result.data.forEach((itemInfo, index) => {
+                result.body.forEach((itemInfo, index) => {
                     allItemInfo.push(itemInfo);
                     isAllItemInfoDirectlyDisplayKeyWithoutShowHighlightKeyword[index] = determineDisplayKeyOrValueWithoutShowHighlightKeyword(itemInfo.key, itemInfoSearchKey);
                     isAllItemInfoDirectlyDisplayValueWithoutShowHighlightKeyword[index] = '0';
@@ -104,7 +104,7 @@ function GlobalSearchValueController($scope, $window, $translate, toastr, AppUti
             }else{
                 $scope.needToBeHighlightedKey = $scope.itemInfoSearchKey;
                 $scope.needToBeHighlightedValue = $scope.itemInfoSearchValue;
-                result.data.forEach((itemInfo, index) => {
+                result.body.forEach((itemInfo, index) => {
                     allItemInfo.push(itemInfo);
                     isAllItemInfoDirectlyDisplayValueWithoutShowHighlightKeyword[index] = determineDisplayKeyOrValueWithoutShowHighlightKeyword(itemInfo.value, itemInfoSearchValue);
                     isAllItemInfoDirectlyDisplayKeyWithoutShowHighlightKeyword[index] = determineDisplayKeyOrValueWithoutShowHighlightKeyword(itemInfo.key, itemInfoSearchKey);
@@ -131,14 +131,7 @@ function GlobalSearchValueController($scope, $window, $translate, toastr, AppUti
 
         function handleError(error) {
             $scope.itemInfo = [];
-            switch (error.status) {
-                case 400:
-                    toastr.warning(error.data, $translate.instant('Item.GlobalSearch.Tips'));
-                    break;
-                default:
-                    toastr.error(AppUtil.errorMsg(error), $translate.instant('Item.GlobalSearchSystemError'));
-                    break;
-            }
+            toastr.error(AppUtil.errorMsg(error), $translate.instant('Item.GlobalSearchSystemError'));
         }
     }
 
